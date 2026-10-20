@@ -174,8 +174,14 @@ void HdPhantasosRenderPass::_Execute(const HdRenderPassStateSharedPtr& renderPas
     phantasos::ProxyStyle style;
     style.outlineWidth = _renderDelegate->GetRenderSetting<float>(
         HdPhantasosTokens->outlineWidth, style.outlineWidth);
-    style.shading = _renderDelegate->GetRenderSetting<bool>(
-        HdPhantasosTokens->proxyShading, style.shading);
+    // Two switches rather than one three-way setting: a host's settings panel
+    // shows a bool as a checkbox and a token as bare text. Clay wins when both
+    // are on; it is shaded by definition.
+    if (_renderDelegate->GetRenderSetting<bool>(HdPhantasosTokens->proxyClay, false)) {
+        style.look = phantasos::Look::Clay;
+    } else if (_renderDelegate->GetRenderSetting<bool>(HdPhantasosTokens->proxyShading, false)) {
+        style.look = phantasos::Look::Shaded;
+    }
     style.checkerSize = _renderDelegate->GetRenderSetting<float>(
         HdPhantasosTokens->checkerSize, style.checkerSize);
 

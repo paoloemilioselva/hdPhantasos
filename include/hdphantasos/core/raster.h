@@ -72,15 +72,27 @@ struct Camera {
     Matrix4 projection;
 };
 
+/// How surfaces are coloured and lit.
+enum class Look : std::uint8_t {
+    /// Matrix-Game 4.0's training proxies: flat colour per subject, unlit.
+    Flat,
+    /// The same colours, lit by one light fixed to the camera, above and to
+    /// the left, so the top, the front and the side of a box differ.
+    Shaded,
+    /// One grey material on everything, ground included, under the same
+    /// light: a clay render, for models that read form rather than identity.
+    Clay,
+};
+
+const char* LookName(Look look);
+
 /// How the proxy is drawn. Defaults follow Matrix-Game 4.0's training proxies:
 /// flat colour per object, black outlines, grey checker ground, black sky.
 struct ProxyStyle {
     /// Outline width in pixels for a 480-row image, scaled with the image
     /// height so the guide looks the same at any size. 0 draws none.
     float outlineWidth = 1.0f;
-    /// Darken faces turned away from the camera, for models that read a clay
-    /// render rather than a flat ID map.
-    bool shading = false;
+    Look look = Look::Flat;
     /// Ground checker cell size, in world units.
     float checkerSize = 1.0f;
 };

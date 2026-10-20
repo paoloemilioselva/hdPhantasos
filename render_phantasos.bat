@@ -20,7 +20,8 @@ IF "%~1"=="" (
   ECHO Settings are taken from the environment. These are the names the
   ECHO delegate reads; see src/hydra/render_delegate.cpp.
   ECHO   HDPHANTASOS_OUTLINE_WIDTH   default 1     outline pixels at 480 rows, 0 for none
-  ECHO   HDPHANTASOS_PROXY_SHADING   default 0     1 darkens faces turned from the camera
+  ECHO   HDPHANTASOS_PROXY_SHADING   default 0     1 lights the colours from above left of the camera
+  ECHO   HDPHANTASOS_PROXY_CLAY      default 0     1 draws everything in grey clay, lit the same way
   ECHO   HDPHANTASOS_CHECKER_SIZE    default 1     ground checker cell, world units
   ECHO   HDPHANTASOS_MANIFEST        a directory: each frame writes manifest.json
   ECHO                               ^(the subjects and what is seen of them^) and

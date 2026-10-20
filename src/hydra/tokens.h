@@ -24,6 +24,7 @@ inline constexpr const char* kHdPhantasosDisplayName = "Phantasos";
     /* Render settings. */                                              \
     ((outlineWidth,   "phantasos:outlineWidth"))                        \
     ((proxyShading,   "phantasos:proxyShading"))                        \
+    ((proxyClay,      "phantasos:proxyClay"))                           \
     ((checkerSize,    "phantasos:checkerSize"))                         \
     /* An AOV of our own: the subject each pixel shows. */              \
     (subjectId)

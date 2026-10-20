@@ -96,7 +96,8 @@ Settings, as render settings in usdview or environment variables for usdrecord:
 | Setting | Variable | Default |
 |---|---|---|
 | Outline width, pixels at 480 rows (0: none) | `HDPHANTASOS_OUTLINE_WIDTH` | 1 |
-| Shade the proxy (darken faces turned away) | `HDPHANTASOS_PROXY_SHADING` | off |
+| Shade the proxy: the same colours, lit by one light fixed to the camera (above left), so each face of a box has its own tone | `HDPHANTASOS_PROXY_SHADING` | off |
+| Clay: one grey material on everything, ground included, under the same light (wins over shading) | `HDPHANTASOS_PROXY_CLAY` | off |
 | Ground checker size, world units | `HDPHANTASOS_CHECKER_SIZE` | 1 |
 
 `HDPHANTASOS_TRACE=1` prints what is synced and drawn, with timings.

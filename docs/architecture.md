@@ -50,6 +50,12 @@ and the look is also a clear guide for an image model.
 - Outlines are drawn into the nearer of two differing pixels (so a line lies
   on the object in front), between primitives and along creases sharper
   than 60 degrees. Width scales with image height.
+- Two other looks, for models that read form rather than identity: *shaded*
+  keeps the colours under one light fixed to the camera (above left, a
+  little in front), so a box always shows three tones; *clay* is one grey
+  material on everything under the same light plus a soft sky term. The
+  light is fixed to the camera rather than the world so the same view of the
+  same thing always reads the same.
 - The ground checker lies in the plane the surface mostly faces, so Y-up and
   Z-up stages both work without reading the stage's up axis, which Hydra does
   not pass.

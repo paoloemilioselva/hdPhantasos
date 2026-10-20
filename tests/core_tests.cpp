@@ -4,6 +4,7 @@
 #include "test_support.h"
 
 #include <cmath>
+#include <array>
 #include <set>
 
 using namespace phantasos;
@@ -266,6 +267,59 @@ void TestProxyRgb8IsTopFirst()
     CHECK(bottomRed == 0);
 }
 
+void TestLooks()
+{
+    // A unit cube turned and tipped so three faces show: flat gives one
+    // colour, shaded and clay give each face its own tone, clay is grey.
+    const std::vector<float> points = {-1, -1, -1, 1, -1, -1, 1, 1, -1, -1, 1, -1,
+                                       -1, -1, 1,  1, -1, 1,  1, 1, 1,  -1, 1, 1};
+    const std::vector<std::int32_t> triangles = {
+        0, 2, 1, 0, 3, 2,  4, 5, 6, 4, 6, 7,  0, 1, 5, 0, 5, 4,
+        3, 6, 2, 3, 7, 6,  0, 4, 7, 0, 7, 3,  1, 2, 6, 1, 6, 5};
+    DrawItem cube;
+    cube.points = points.data();
+    cube.pointCount = 8;
+    cube.triangles = triangles.data();
+    cube.triangleCount = 12;
+    cube.subject = 0;
+    cube.primId = 1;
+    const double a = 35 * M_PI / 180, b = 25 * M_PI / 180;
+    Matrix4 rotateY, rotateX, place;
+    rotateY.m[0][0] = std::cos(a);  rotateY.m[0][2] = -std::sin(a);
+    rotateY.m[2][0] = std::sin(a);  rotateY.m[2][2] = std::cos(a);
+    rotateX.m[1][1] = std::cos(b);  rotateX.m[1][2] = std::sin(b);
+    rotateX.m[2][1] = -std::sin(b); rotateX.m[2][2] = std::cos(b);
+    place.m[3][2] = -6;
+    cube.objectToWorld = Multiply(Multiply(rotateY, rotateX), place);
+
+    std::vector<Subject> subjects(1);
+    subjects[0].key = "box";
+    const auto tones = [&](Look look, bool* allGrey) {
+        ProxyStyle style;
+        style.outlineWidth = 0;
+        style.look = look;
+        Frame frame;
+        Rasterize({cube}, subjects, DefaultCamera(1.0), style, 96, 96, &frame);
+        std::set<std::array<float, 3>> found;
+        *allGrey = true;
+        for (std::size_t p = 0; p < frame.subject.size(); ++p) {
+            if (frame.subject[p] != 0) continue;
+            const std::array<float, 3> c = {frame.color[p * 4], frame.color[p * 4 + 1],
+                                            frame.color[p * 4 + 2]};
+            found.insert(c);
+            *allGrey = *allGrey && c[0] == c[1] && c[1] == c[2];
+        }
+        return found.size();
+    };
+    bool grey = false;
+    CHECK(tones(Look::Flat, &grey) == 1);
+    CHECK(tones(Look::Shaded, &grey) == 3);
+    CHECK(!grey);
+    CHECK(tones(Look::Clay, &grey) == 3);
+    CHECK(grey);
+    CHECK(std::string(LookName(Look::Clay)) == "clay");
+}
+
 void TestSubjectColors()
 {
     Subject a, b;
@@ -294,6 +348,7 @@ int main()
     TestOutlines();
     TestFacingAndManifest();
     TestProxyRgb8IsTopFirst();
+    TestLooks();
     TestSubjectColors();
     return phantasos_test::Finish("core");
 }

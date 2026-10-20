@@ -64,8 +64,10 @@ void HdPhantasosRenderDelegate::_Initialize()
     _settingDescriptors = {
         {"Outline width (pixels at 480 rows)", HdPhantasosTokens->outlineWidth,
          VtValue(EnvFloat("HDPHANTASOS_OUTLINE_WIDTH", 1.0f))},
-        {"Shade the proxy", HdPhantasosTokens->proxyShading,
+        {"Shade the proxy (light fixed to the camera)", HdPhantasosTokens->proxyShading,
          VtValue(EnvBool("HDPHANTASOS_PROXY_SHADING", false))},
+        {"Clay (one grey material, shaded)", HdPhantasosTokens->proxyClay,
+         VtValue(EnvBool("HDPHANTASOS_PROXY_CLAY", false))},
         {"Ground checker size (world units)", HdPhantasosTokens->checkerSize,
          VtValue(EnvFloat("HDPHANTASOS_CHECKER_SIZE", 1.0f))},
     };

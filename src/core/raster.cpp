@@ -212,6 +212,16 @@ bool Invert(const Matrix4& in, Matrix4* out)
     return true;
 }
 
+const char* LookName(Look look)
+{
+    switch (look) {
+        case Look::Shaded: return "shaded";
+        case Look::Clay: return "clay";
+        case Look::Flat: break;
+    }
+    return "flat";
+}
+
 const char* RoleName(Role role)
 {
     switch (role) {
@@ -475,7 +485,16 @@ void Rasterize(const std::vector<DrawItem>& items,
     }
     const float checkerLight = SrgbToLinear(0.60f);
     const float checkerDark = SrgbToLinear(0.45f);
+    const float clay = SrgbToLinear(0.78f);
     const double checkerSize = style.checkerSize > 0 ? style.checkerSize : 1.0;
+
+    // The light is fixed to the camera: above, to the left and a little in
+    // front, so a box seen from anywhere shows its top brightest, the side
+    // towards the light next, the front darker and the far side in shadow.
+    // Fixed to the camera rather than the world, the same view of the same
+    // thing always reads the same, whichever way the stage turned it.
+    double toLight[3] = {-0.6, 0.8, 0.35};  // view space: x right, y up, +z to the camera
+    Normalize(toLight);
 
     ParallelFor(static_cast<std::size_t>(height), [&](std::size_t row) {
         const double ndcY = (row + 0.5) / height * 2.0 - 1.0;
@@ -523,7 +542,9 @@ void Rasterize(const std::vector<DrawItem>& items,
             const Role role = r.subject >= 0 && static_cast<std::size_t>(r.subject) < subjects.size()
                                   ? subjects[r.subject].role
                                   : Role::Subject;
-            if (role == Role::Ground && !subjects[r.subject].hasColor) {
+            if (style.look == Look::Clay) {
+                color[0] = color[1] = color[2] = clay;
+            } else if (role == Role::Ground && !subjects[r.subject].hasColor) {
                 // The checker lies in the plane the surface mostly faces, so a
                 // floor on a Y-up or a Z-up stage is checkered alike, and so is
                 // a ramp.
@@ -541,9 +562,17 @@ void Rasterize(const std::vector<DrawItem>& items,
                 color[1] = subjectColors[r.subject][1];
                 color[2] = subjectColors[r.subject][2];
             }
-            if (style.shading) {
-                const float light = static_cast<float>(0.55 + 0.45 * std::abs(facing));
-                for (float& c : color) c *= light;
+            if (style.look != Look::Flat) {
+                double viewNormal[3];
+                TransformVector(normal, camera.worldToView, viewNormal);
+                Normalize(viewNormal);
+                const double key = std::max(0.0, Dot(viewNormal, toLight));
+                // Clay adds a soft sky term, so faces away from the key keep
+                // their form instead of going flat dark.
+                const double light = style.look == Look::Clay
+                                         ? 0.18 + 0.67 * key + 0.15 * (0.5 + 0.5 * viewNormal[1])
+                                         : 0.4 + 0.6 * key;
+                for (float& c : color) c *= static_cast<float>(light);
             }
             for (int c = 0; c < 3; ++c) frame->color[pixel * 4 + c] = color[c];
         }
