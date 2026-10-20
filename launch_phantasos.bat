@@ -7,7 +7,7 @@ CALL "%~dp0setup_usd_env.bat"
 IF ERRORLEVEL 1 EXIT /B %ERRORLEVEL%
 
 SET "SCENE_FILE=%~1"
-IF "%SCENE_FILE%"=="" SET "SCENE_FILE=%~dp0examples\floor_two_boxes.usda"
+IF "%SCENE_FILE%"=="" SET "SCENE_FILE=%~dp0examples\city_drive.usda"
 
 IF NOT EXIST "%SCENE_FILE%" (
   ECHO [hdPhantasos] Stage not found: %SCENE_FILE%

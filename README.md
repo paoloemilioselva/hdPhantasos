@@ -84,7 +84,7 @@ compile.bat              :: build and install into USDEXTRA (Desktop\usd-26.03-e
 compile.bat test         :: build, install, then run every test
 compile.bat core-only    :: the rasterizer and its tests, without OpenUSD
 
-launch_phantasos.bat [stage.usda]                          :: usdview, default: examples\floor_two_boxes.usda
+launch_phantasos.bat [stage.usda]                          :: usdview, default: examples\city_drive.usda
 render_phantasos.bat --camera /World/camera stage.usda out.png
 ```
 

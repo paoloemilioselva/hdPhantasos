@@ -5,7 +5,7 @@
     The chest is two cubes (body and lid) made one subject by the
     PhantasosAPI on their group; the crate is one cube. Render it with:
         render_phantasos.bat examples/floor_two_boxes.usda out.png
-    or open it with launch_phantasos.bat."""
+    or open it with launch_phantasos.bat examples/floor_two_boxes.usda."""
     defaultPrim = "World"
     metersPerUnit = 1
     upAxis = "Y"

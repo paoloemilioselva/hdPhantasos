@@ -4,7 +4,7 @@
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 . "$here/setup_usd_env.sh" || exit $?
 
-scene="${1:-$here/examples/floor_two_boxes.usda}"
+scene="${1:-$here/examples/city_drive.usda}"
 if [ ! -f "$scene" ]; then
   echo "[hdPhantasos] Stage not found: $scene"
   exit 1
