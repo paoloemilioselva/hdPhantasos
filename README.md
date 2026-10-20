@@ -17,6 +17,17 @@ stone) rather than of people. Here he turns boxes into a world.
 |---|---|
 | ![](docs/images/floor_two_boxes_proxy.png) | ![](docs/images/kitchen_set_proxy.png) |
 
+## Examples
+
+| Stage | What it is |
+|---|---|
+| [examples/floor_two_boxes.usda](examples/floor_two_boxes.usda) | A floor, a chest made of two cubes, and a crate: the smallest described stage |
+| [examples/city_drive.usda](examples/city_drive.usda) | A city street driven from behind a sedan, laid out like Matrix-Game 4.0's City Racing scene: 35 described subjects (20 buildings, parked cars, pedestrians, lamps, trees, road, lane markings), 120 frames at 24 fps with a chase camera. Written by [examples/make_city_drive.py](examples/make_city_drive.py): edit that, not the .usda |
+
+![The city drive at frame 60](docs/images/city_drive_proxy.png)
+
+All 120 frames of the city drive render in 5.4 s through usdrecord, start-up included.
+
 ## Describing a stage
 
 Each prim says what it is through constant primvars, declared by the codeless

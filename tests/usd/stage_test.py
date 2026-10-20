@@ -38,13 +38,18 @@ def find_usdrecord():
     return None
 
 
-def render(usdrecord, stage, output_dir, width=864, settings=None):
+def render(usdrecord, stage, output_dir, width=864, settings=None, frame=None):
     os.makedirs(output_dir, exist_ok=True)
     environment = dict(os.environ, HDPHANTASOS_MANIFEST=output_dir, **(settings or {}))
     image = os.path.join(output_dir, "usdrecord.png")
     command = [sys.executable, usdrecord, "--renderer", "Phantasos",
                "--camera", "/World/camera", "--imageWidth", str(width),
-               "--colorCorrectionMode", "sRGB", stage, image]
+               "--colorCorrectionMode", "sRGB"]
+    if frame is not None:
+        # usdrecord insists on a frame placeholder whenever --frames is given.
+        command += ["--frames", str(frame)]
+        image = os.path.join(output_dir, "usdrecord.####.png")
+    command += [stage, image]
     result = subprocess.run(command, env=environment, capture_output=True, text=True)
     if result.returncode != 0:
         print(result.stdout)
@@ -58,6 +63,8 @@ def render(usdrecord, stage, output_dir, width=864, settings=None):
         manifest = json.load(handle)
     from PIL import Image
     proxy = Image.open(os.path.join(output_dir, "proxy.png")).convert("RGB")
+    if frame is not None:
+        image = image.replace("####", f"{frame:04d}")
     recorded = Image.open(image).convert("RGB") if os.path.isfile(image) else None
     return manifest, proxy, recorded
 
@@ -177,6 +184,28 @@ def test_implicit_and_instances(usdrecord, output):
         check(subjects["lamp"]["visible"], "the lamp (cylinder, cone, capsule) was not drawn")
 
 
+def test_city_drive(usdrecord, output):
+    """The animated street: time samples reach the delegate, the chase camera
+    keeps the car where it was, and the street goes by."""
+    stage = os.path.join(ROOT, "examples", "city_drive.usda")
+    first, _, _ = render(usdrecord, stage, os.path.join(output, "city_drive_1"), frame=1)
+    last, _, _ = render(usdrecord, stage, os.path.join(output, "city_drive_120"), frame=120)
+    if first is None or last is None:
+        return
+    a, b = by_key(first), by_key(last)
+    check("ego car" in a and "ego car" in b, "no ego car")
+    if "ego car" not in a or "ego car" not in b:
+        return
+    check(a["ego car"].get("facing") == "away from the camera",
+          f"the ego car faces {a['ego car'].get('facing')!r}, not away")
+    check(abs(a["ego car"]["coverage"] - b["ego car"]["coverage"]) < 0.005,
+          "the chase camera did not keep the car the same size")
+    check(a["parked car 1"]["visible"] and not b["parked car 1"]["visible"],
+          "parked car 1 should be passed by the last frame")
+    buildings = sum(1 for s in first["subjects"] if s["visible"] and s["key"].startswith("building"))
+    check(buildings >= 10, f"only {buildings} buildings in view")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
@@ -195,6 +224,7 @@ def main():
     shutil.rmtree(args.output, ignore_errors=True)
     test_floor_two_boxes(usdrecord, args.output)
     test_implicit_and_instances(usdrecord, args.output)
+    test_city_drive(usdrecord, args.output)
     print(f"stage: {len(failures)} failures")
     return 1 if failures else 0
 

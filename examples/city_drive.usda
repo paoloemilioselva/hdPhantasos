@@ -1,0 +1,865 @@
+#usda 1.0
+(
+    doc = """A city street, driven from behind a car, for hdPhantasos.
+
+    Laid out like Matrix-Game 4.0's City Racing scene: a third-person view
+    behind a four-door sedan in the right-hand lane, buildings on both sides,
+    parked cars, pedestrians, street lamps and trees. Every thing is a
+    described subject (primvars:phantasos:*). The car drives
+    60 m in 120 frames at 24 fps; the camera follows it.
+
+    Written by examples/make_city_drive.py: edit that and run it again."""
+    customLayerData = {
+        string "phantasos:shot" = "Daytime city, cloudy sky. A third-person driving view behind a modern four-door sedan in the right-hand lane of a city street, between multi-storey buildings."
+    }
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Y"
+    startTimeCode = 1
+    endTimeCode = 120
+    timeCodesPerSecond = 24
+    framesPerSecond = 24
+)
+
+def Xform "World"
+{
+    def Mesh "ground" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "ground"
+        string primvars:phantasos:description = "grey paving slabs"
+        token primvars:phantasos:role = "ground"
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [(-60, 0, 40.0), (60, 0, 40.0), (60, 0, -260.0), (-60, 0, -260.0)]
+    }
+
+    def Mesh "road" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "road"
+        string primvars:phantasos:description = "a wide asphalt city street, dark grey and slightly worn"
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [(-5.0, 0.01, 40.0), (5.0, 0.01, 40.0), (5.0, 0.01, -260.0), (-5.0, 0.01, -260.0)]
+    }
+
+    def PointInstancer "laneMarkings" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "lane markings"
+        string primvars:phantasos:description = "white dashed centre-line markings"
+        rel prototypes = </World/laneMarkings/Prototypes/dash>
+        int[] protoIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        point3f[] positions = [(0.0, 0.03, 40), (0.0, 0.03, 31), (0.0, 0.03, 22), (0.0, 0.03, 13), (0.0, 0.03, 4), (0.0, 0.03, -5), (0.0, 0.03, -14), (0.0, 0.03, -23), (0.0, 0.03, -32), (0.0, 0.03, -41), (0.0, 0.03, -50), (0.0, 0.03, -59), (0.0, 0.03, -68), (0.0, 0.03, -77), (0.0, 0.03, -86), (0.0, 0.03, -95), (0.0, 0.03, -104), (0.0, 0.03, -113), (0.0, 0.03, -122), (0.0, 0.03, -131), (0.0, 0.03, -140), (0.0, 0.03, -149), (0.0, 0.03, -158), (0.0, 0.03, -167), (0.0, 0.03, -176), (0.0, 0.03, -185), (0.0, 0.03, -194), (0.0, 0.03, -203), (0.0, 0.03, -212), (0.0, 0.03, -221), (0.0, 0.03, -230), (0.0, 0.03, -239), (0.0, 0.03, -248), (0.0, 0.03, -257)]
+        def Scope "Prototypes"
+        {
+            def Cube "dash"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0, 0)
+                float3 xformOp:scale = (0.08, 0.02, 1.5)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+        }
+    }
+
+    def Xform "sidewalks" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "sidewalks"
+        string primvars:phantasos:description = "concrete sidewalks with granite kerbs"
+        def Cube "left"
+        {
+            double size = 2
+            double3 xformOp:translate = (-6.5, 0.075, -110.0)
+            float3 xformOp:scale = (1.5, 0.075, 150.0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right"
+        {
+            double size = 2
+            double3 xformOp:translate = (6.5, 0.075, -110.0)
+            float3 xformOp:scale = (1.5, 0.075, 150.0)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+
+    def Scope "buildings"
+    {
+        def Cube "left01" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left01"
+            string primvars:phantasos:description = "a dark grey glass office tower with narrow vertical mullions"
+            double size = 2
+            double3 xformOp:translate = (-14.31, 16.00, 29.58)
+            float3 xformOp:scale = (5.31, 16.00, 8.42)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left02" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left02"
+            string primvars:phantasos:description = "a red-brown brick apartment block with black iron fire escapes"
+            double size = 2
+            double3 xformOp:translate = (-14.06, 22.50, 11.45)
+            float3 xformOp:scale = (5.06, 22.50, 7.54)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left03" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left03"
+            string primvars:phantasos:description = "a pale limestone bank with tall columned windows"
+            double size = 2
+            double3 xformOp:translate = (-16.30, 9.00, -11.61)
+            float3 xformOp:scale = (7.30, 9.00, 11.80)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left04" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left04"
+            string primvars:phantasos:description = "a cream stucco hotel with striped awnings over the ground floor"
+            double size = 2
+            double3 xformOp:translate = (-16.34, 6.00, -34.89)
+            float3 xformOp:scale = (7.34, 6.00, 9.16)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left05" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left05"
+            string primvars:phantasos:description = "a dark grey high-rise with a stepped crown"
+            double size = 2
+            double3 xformOp:translate = (-14.08, 30.00, -58.13)
+            float3 xformOp:scale = (5.08, 30.00, 12.66)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left06" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left06"
+            string primvars:phantasos:description = "a narrow red brick shop house with a green painted shopfront"
+            double size = 2
+            double3 xformOp:translate = (-14.58, 12.00, -85.91)
+            float3 xformOp:scale = (5.58, 12.00, 11.80)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left07" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left07"
+            string primvars:phantasos:description = "a blue glass office block reflecting the clouds"
+            double size = 2
+            double3 xformOp:translate = (-16.88, 12.00, -111.43)
+            float3 xformOp:scale = (7.88, 12.00, 12.20)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left08" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left08"
+            string primvars:phantasos:description = "a weathered concrete parking garage with open levels"
+            double size = 2
+            double3 xformOp:translate = (-16.02, 22.50, -135.07)
+            float3 xformOp:scale = (7.02, 22.50, 10.64)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left09" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left09"
+            string primvars:phantasos:description = "a sand-coloured art deco tower with vertical ribs"
+            double size = 2
+            double3 xformOp:translate = (-14.84, 22.50, -155.56)
+            float3 xformOp:scale = (5.84, 22.50, 8.48)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "left10" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building left10"
+            string primvars:phantasos:description = "a low brick warehouse converted to loft apartments"
+            double size = 2
+            double3 xformOp:translate = (-14.88, 30.00, -174.53)
+            float3 xformOp:scale = (5.88, 30.00, 7.04)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right01" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right01"
+            string primvars:phantasos:description = "a silver-grey high-rise with horizontal bands of windows"
+            double size = 2
+            double3 xformOp:translate = (15.53, 16.00, 25.91)
+            float3 xformOp:scale = (6.53, 16.00, 12.09)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right02" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right02"
+            string primvars:phantasos:description = "a brown brick apartment block with bay windows"
+            double size = 2
+            double3 xformOp:translate = (15.35, 9.00, 3.11)
+            float3 xformOp:scale = (6.35, 9.00, 8.73)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right03" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right03"
+            string primvars:phantasos:description = "a white modern office building with deep balconies"
+            double size = 2
+            double3 xformOp:translate = (14.13, 6.00, -19.06)
+            float3 xformOp:scale = (5.13, 6.00, 11.88)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right04" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right04"
+            string primvars:phantasos:description = "a red-brown high-rise with a water tower on the roof"
+            double size = 2
+            double3 xformOp:translate = (15.56, 30.00, -46.04)
+            float3 xformOp:scale = (6.56, 30.00, 12.98)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right05" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right05"
+            string primvars:phantasos:description = "a corner diner with a chrome facade and a neon sign"
+            double size = 2
+            double3 xformOp:translate = (16.99, 9.00, -70.23)
+            float3 xformOp:scale = (7.99, 9.00, 9.06)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right06" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right06"
+            string primvars:phantasos:description = "a grey stone courthouse with a broad flight of steps"
+            double size = 2
+            double3 xformOp:translate = (15.91, 16.00, -92.50)
+            float3 xformOp:scale = (6.91, 16.00, 12.48)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right07" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right07"
+            string primvars:phantasos:description = "a black steel and glass tower"
+            double size = 2
+            double3 xformOp:translate = (16.24, 12.00, -115.59)
+            float3 xformOp:scale = (7.24, 12.00, 9.13)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right08" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right08"
+            string primvars:phantasos:description = "a yellow brick tenement with laundry lines between windows"
+            double size = 2
+            double3 xformOp:translate = (14.97, 6.00, -135.63)
+            float3 xformOp:scale = (5.97, 6.00, 8.19)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right09" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right09"
+            string primvars:phantasos:description = "a green glass hotel with a curved front"
+            double size = 2
+            double3 xformOp:translate = (15.75, 9.00, -155.47)
+            float3 xformOp:scale = (6.75, 9.00, 8.66)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "right10" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "building right10"
+            string primvars:phantasos:description = "a terracotta-clad office building with arched windows"
+            double size = 2
+            double3 xformOp:translate = (14.87, 6.00, -177.67)
+            float3 xformOp:scale = (5.87, 6.00, 12.61)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+
+    def PointInstancer "streetLamps" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "street lamps"
+        string primvars:phantasos:description = "black cast-iron street lamps"
+        rel prototypes = </World/streetLamps/Prototypes/item>
+        int[] protoIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        point3f[] positions = [(-5.6, 0.15, 34.0), (-5.6, 0.15, 10.0), (-5.6, 0.15, -14.0), (-5.6, 0.15, -38.0), (-5.6, 0.15, -62.0), (-5.6, 0.15, -86.0), (-5.6, 0.15, -110.0), (-5.6, 0.15, -134.0), (-5.6, 0.15, -158.0), (-5.6, 0.15, -182.0), (-5.6, 0.15, -206.0), (-5.6, 0.15, -230.0), (-5.6, 0.15, -254.0), (5.6, 0.15, 34.0), (5.6, 0.15, 10.0), (5.6, 0.15, -14.0), (5.6, 0.15, -38.0), (5.6, 0.15, -62.0), (5.6, 0.15, -86.0), (5.6, 0.15, -110.0), (5.6, 0.15, -134.0), (5.6, 0.15, -158.0), (5.6, 0.15, -182.0), (5.6, 0.15, -206.0), (5.6, 0.15, -230.0), (5.6, 0.15, -254.0)]
+        def Scope "Prototypes"
+        {
+            def Xform "item"
+            {
+                def Cylinder "pole"
+                {
+                    token axis = "Y"
+                    double height = 6
+                    double radius = 0.08
+                    double3 xformOp:translate = (0, 3, 0)
+                    uniform token[] xformOpOrder = ["xformOp:translate"]
+                }
+                def Sphere "lantern"
+                {
+                    double radius = 0.3
+                    double3 xformOp:translate = (0, 6.1, 0)
+                    uniform token[] xformOpOrder = ["xformOp:translate"]
+                }
+            }
+        }
+    }
+
+    def PointInstancer "streetTrees" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "street trees"
+        string primvars:phantasos:description = "young plane trees with full green crowns"
+        rel prototypes = </World/streetTrees/Prototypes/item>
+        int[] protoIndices = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        point3f[] positions = [(-5.6, 0.15, 22.0), (-5.6, 0.15, -2.0), (-5.6, 0.15, -26.0), (-5.6, 0.15, -50.0), (-5.6, 0.15, -74.0), (-5.6, 0.15, -98.0), (-5.6, 0.15, -122.0), (-5.6, 0.15, -146.0), (-5.6, 0.15, -170.0), (-5.6, 0.15, -194.0), (-5.6, 0.15, -218.0), (-5.6, 0.15, -242.0), (5.6, 0.15, 22.0), (5.6, 0.15, -2.0), (5.6, 0.15, -26.0), (5.6, 0.15, -50.0), (5.6, 0.15, -74.0), (5.6, 0.15, -98.0), (5.6, 0.15, -122.0), (5.6, 0.15, -146.0), (5.6, 0.15, -170.0), (5.6, 0.15, -194.0), (5.6, 0.15, -218.0), (5.6, 0.15, -242.0)]
+        def Scope "Prototypes"
+        {
+            def Xform "item"
+            {
+                def Cylinder "trunk"
+                {
+                    token axis = "Y"
+                    double height = 2.4
+                    double radius = 0.15
+                    double3 xformOp:translate = (0, 1.2, 0)
+                    uniform token[] xformOpOrder = ["xformOp:translate"]
+                }
+                def Sphere "crown"
+                {
+                    double radius = 1.6
+                    double3 xformOp:translate = (0, 3.6, 0)
+                    uniform token[] xformOpOrder = ["xformOp:translate"]
+                }
+            }
+        }
+    }
+
+    def Scope "parkedCars"
+    {
+        def Xform "car01" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "parked car 1"
+            string primvars:phantasos:description = "a silver hatchback parked against the kerb"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate = (4.05, 0, -18.0)
+            float xformOp:rotateY = 180
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "body"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.55, 0)
+                float3 xformOp:scale = (0.925, 0.32, 2.3)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "cabin"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.12, -0.2)
+                float3 xformOp:scale = (0.8140000000000001, 0.29, 1.1039999999999999)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cylinder "wheelFL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelFR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+        def Xform "car02" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "parked car 2"
+            string primvars:phantasos:description = "a dark blue estate car parked against the kerb"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate = (4.05, 0, -34.0)
+            float xformOp:rotateY = 180
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "body"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.55, 0)
+                float3 xformOp:scale = (0.925, 0.32, 2.3)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "cabin"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.12, -0.2)
+                float3 xformOp:scale = (0.8140000000000001, 0.29, 1.1039999999999999)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cylinder "wheelFL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelFR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+        def Xform "car03" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "parked car 3"
+            string primvars:phantasos:description = "a white delivery van parked against the kerb"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate = (-4.05, 0, -26.0)
+            float xformOp:rotateY = 0
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "body"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.55, 0)
+                float3 xformOp:scale = (0.925, 0.32, 2.3)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "cabin"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.12, -0.2)
+                float3 xformOp:scale = (0.8140000000000001, 0.29, 1.1039999999999999)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cylinder "wheelFL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelFR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+        def Xform "car04" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "parked car 4"
+            string primvars:phantasos:description = "a red SUV parked against the kerb"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate = (4.05, 0, -61.0)
+            float xformOp:rotateY = 180
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "body"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.55, 0)
+                float3 xformOp:scale = (0.925, 0.32, 2.3)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "cabin"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.12, -0.2)
+                float3 xformOp:scale = (0.8140000000000001, 0.29, 1.1039999999999999)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cylinder "wheelFL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelFR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+        def Xform "car05" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "parked car 5"
+            string primvars:phantasos:description = "a black taxi parked against the kerb"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate = (-4.05, 0, -72.0)
+            float xformOp:rotateY = 0
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "body"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.55, 0)
+                float3 xformOp:scale = (0.925, 0.32, 2.3)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "cabin"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.12, -0.2)
+                float3 xformOp:scale = (0.8140000000000001, 0.29, 1.1039999999999999)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cylinder "wheelFL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelFR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, 1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRL"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+            def Cylinder "wheelRR"
+            {
+                token axis = "X"
+                double height = 0.25
+                double radius = 0.33
+                double3 xformOp:translate = (-0.875, 0.33, -1.4499999999999997)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+    }
+
+    def Scope "pedestrians"
+    {
+        def Xform "person01" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "pedestrian 1"
+            string primvars:phantasos:description = "a woman in a beige trench coat walking away along the sidewalk"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate.timeSamples = {
+                1: (6.5, 0.15, -20.0),
+                120: (6.5, 0.15, -26.0),
+            }
+            float xformOp:rotateY = 180
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "legs"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.45, 0)
+                float3 xformOp:scale = (0.17, 0.45, 0.12)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "torso"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.2, 0)
+                float3 xformOp:scale = (0.22, 0.32, 0.13)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "arms"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.15, 0)
+                float3 xformOp:scale = (0.3, 0.3, 0.08)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Sphere "head"
+            {
+                double radius = 0.12
+                double3 xformOp:translate = (0, 1.64, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+        def Xform "person02" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "pedestrian 2"
+            string primvars:phantasos:description = "a man in a dark suit with a briefcase walking toward the camera"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate.timeSamples = {
+                1: (-6.8, 0.15, -38.0),
+                120: (-6.8, 0.15, -32.0),
+            }
+            float xformOp:rotateY = 0
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "legs"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.45, 0)
+                float3 xformOp:scale = (0.17, 0.45, 0.12)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "torso"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.2, 0)
+                float3 xformOp:scale = (0.22, 0.32, 0.13)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "arms"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.15, 0)
+                float3 xformOp:scale = (0.3, 0.3, 0.08)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Sphere "head"
+            {
+                double radius = 0.12
+                double3 xformOp:translate = (0, 1.64, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+        def Xform "person03" (
+            prepend apiSchemas = ["PhantasosAPI"]
+        )
+        {
+            string primvars:phantasos:subject = "pedestrian 3"
+            string primvars:phantasos:description = "a delivery cyclist in a yellow jacket standing beside the kerb"
+            bool primvars:phantasos:hasFront = 1
+            double3 xformOp:translate = (6.2, 0.15, -55.0)
+            float xformOp:rotateY = 0
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+            def Cube "legs"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 0.45, 0)
+                float3 xformOp:scale = (0.17, 0.45, 0.12)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "torso"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.2, 0)
+                float3 xformOp:scale = (0.22, 0.32, 0.13)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Cube "arms"
+            {
+                double size = 2
+                double3 xformOp:translate = (0, 1.15, 0)
+                float3 xformOp:scale = (0.3, 0.3, 0.08)
+                uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+            }
+            def Sphere "head"
+            {
+                double radius = 0.12
+                double3 xformOp:translate = (0, 1.64, 0)
+                uniform token[] xformOpOrder = ["xformOp:translate"]
+            }
+        }
+    }
+
+    def Xform "egoCar" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "ego car"
+        string primvars:phantasos:description = "a modern four-door sedan with a curved roof and a separate rear trunk, metallic dark grey"
+        bool primvars:phantasos:hasFront = 1
+        double3 xformOp:translate.timeSamples = {
+            1: (1.6, 0, 0),
+            120: (1.6, 0, -59.50),
+        }
+        float xformOp:rotateY = 180
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+        def Cube "body"
+        {
+            double size = 2
+            double3 xformOp:translate = (0, 0.55, 0)
+            float3 xformOp:scale = (0.925, 0.32, 2.3)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cube "cabin"
+        {
+            double size = 2
+            double3 xformOp:translate = (0, 1.12, -0.2)
+            float3 xformOp:scale = (0.8140000000000001, 0.29, 1.1039999999999999)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+        def Cylinder "wheelFL"
+        {
+            token axis = "X"
+            double height = 0.25
+            double radius = 0.33
+            double3 xformOp:translate = (0.875, 0.33, 1.4499999999999997)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+        def Cylinder "wheelFR"
+        {
+            token axis = "X"
+            double height = 0.25
+            double radius = 0.33
+            double3 xformOp:translate = (-0.875, 0.33, 1.4499999999999997)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+        def Cylinder "wheelRL"
+        {
+            token axis = "X"
+            double height = 0.25
+            double radius = 0.33
+            double3 xformOp:translate = (0.875, 0.33, -1.4499999999999997)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+        def Cylinder "wheelRR"
+        {
+            token axis = "X"
+            double height = 0.25
+            double radius = 0.33
+            double3 xformOp:translate = (-0.875, 0.33, -1.4499999999999997)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+
+    def Camera "camera"
+    {
+        float focalLength = 24
+        float horizontalAperture = 36
+        float verticalAperture = 20
+        float2 clippingRange = (0.1, 2000)
+        double3 xformOp:translate.timeSamples = {
+            1: (1.6, 2.6, 7.5),
+            120: (1.6, 2.6, -52.00),
+        }
+        float xformOp:rotateX = -9
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateX"]
+    }
+}
