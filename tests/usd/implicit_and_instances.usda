@@ -1,0 +1,117 @@
+#usda 1.0
+(
+    doc = """Every implicit surface type, a point instancer, a group whose parts
+    share a subject, a prim hidden by visibility and one with no description.
+    Checked by stage_test.py."""
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "World"
+{
+    def Plane "ground" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        token primvars:phantasos:role = "ground"
+        string primvars:phantasos:description = "packed dry earth"
+        token axis = "Y"
+        double length = 20
+        double width = 20
+    }
+
+    def Sphere "ball" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:description = "a red leather ball"
+        double radius = 0.4
+        double3 xformOp:translate = (-2.2, 0.4, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Xform "lamp" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "lamp"
+        string primvars:phantasos:description = "a brass street lamp"
+        double3 xformOp:translate = (-0.8, 0, 0)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+
+        def Cylinder "post"
+        {
+            token axis = "Y"
+            double height = 2
+            double radius = 0.06
+            double3 xformOp:translate = (0, 1, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+        def Cone "shade"
+        {
+            token axis = "Y"
+            double height = 0.3
+            double radius = 0.25
+            double3 xformOp:translate = (0, 2.1, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+        def Capsule "bulb"
+        {
+            token axis = "Y"
+            double height = 0.1
+            double radius = 0.08
+            double3 xformOp:translate = (0, 1.9, 0)
+            uniform token[] xformOpOrder = ["xformOp:translate"]
+        }
+    }
+
+    def PointInstancer "pillars" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "pillars"
+        string primvars:phantasos:description = "five white stone bollards in a row"
+        rel prototypes = </World/pillars/Prototypes/bollard>
+        int[] protoIndices = [0, 0, 0, 0, 0]
+        point3f[] positions = [(0.4, 0.3, -1), (0.9, 0.3, -1), (1.4, 0.3, -1), (1.9, 0.3, -1), (2.4, 0.3, -1)]
+
+        def Scope "Prototypes"
+        {
+            def Cube "bollard"
+            {
+                double size = 0.3
+                float3 xformOp:scale = (1, 2, 1)
+                uniform token[] xformOpOrder = ["xformOp:scale"]
+            }
+        }
+    }
+
+    def Cube "hidden" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:description = "this must never be seen"
+        token visibility = "invisible"
+        double3 xformOp:translate = (0, 1, 1)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Cube "undescribed"
+    {
+        double size = 0.4
+        double3 xformOp:translate = (2.6, 0.2, 0.6)
+        uniform token[] xformOpOrder = ["xformOp:translate"]
+    }
+
+    def Camera "camera"
+    {
+        float focalLength = 30
+        float horizontalAperture = 36
+        float verticalAperture = 20.25
+        float2 clippingRange = (0.1, 1000)
+        double3 xformOp:translate = (0, 1.6, 6)
+        float xformOp:rotateX = -10
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateX"]
+    }
+}

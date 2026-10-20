@@ -1,0 +1,26 @@
+{
+  "Plugins": [
+    {
+      "Info": {
+        "Types": {
+          "HdPhantasosRendererPlugin": {
+            "bases": ["HdRendererPlugin"],
+            "displayName": "Phantasos",
+            "priority": 0
+          },
+          "HdPhantasos_ImplicitSurfaceSceneIndexPlugin": {
+            "bases": ["HdSceneIndexPlugin"],
+            "loadWithRenderer": "Phantasos",
+            "priority": 0,
+            "displayName": "Turns UsdGeom spheres, cubes, cones, cylinders, capsules and planes into meshes"
+          }
+        }
+      },
+      "LibraryPath": "../$<TARGET_FILE_NAME:hdPhantasos>",
+      "Name": "hdPhantasos",
+      "ResourcePath": "resources",
+      "Root": "..",
+      "Type": "library"
+    }
+  ]
+}

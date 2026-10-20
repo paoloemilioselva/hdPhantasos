@@ -1,0 +1,71 @@
+#usda 1.0
+(
+    """
+    PhantasosAPI: what a prim is, for the hdPhantasos render delegate.
+
+    A codeless schema: nothing is compiled, and usdGenSchema writes only
+    generatedSchema.usda and plugInfo.json. Regenerate both after editing
+    this file (see schema/README.md).
+
+    Every property is a constant primvar, because primvars are what reaches
+    a render delegate in every Hydra host, with or without this schema
+    loaded. The schema adds a name, a type, documentation and a place in
+    the UI; the data travels as primvars either way, and constant primvars
+    are inherited down the namespace, so describing a group's Xform covers
+    every mesh under it.
+    """
+    subLayers = [
+        @usd/schema.usda@
+    ]
+)
+
+over "GLOBAL" (
+    customData = {
+        string libraryName = "phantasosSchema"
+        string libraryPath = "."
+        bool skipCodeGeneration = true
+    }
+)
+{
+}
+
+class "PhantasosAPI" (
+    inherits = </APISchemaBase>
+    customData = {
+        token apiSchemaType = "singleApply"
+    }
+    doc = """Describes a prim, and everything under it, to the hdPhantasos
+    render delegate: which subject it is part of, what that subject looks
+    like, and what part it plays in the picture."""
+)
+{
+    string primvars:phantasos:subject (
+        doc = """The subject this prim belongs to. Meshes with the same key are
+        one subject, described once and drawn in one colour: author it on a
+        group's Xform to make its parts one thing. Unset, each mesh is its own
+        subject, keyed by its path."""
+    )
+    string primvars:phantasos:description (
+        doc = """What the subject is and looks like, in plain words: "an old oak
+        chest bound in green iron". The prompt writer places it in the shot;
+        the description should say only what the thing is."""
+    )
+    token primvars:phantasos:role = "subject" (
+        allowedTokens = ["subject", "ground", "backdrop"]
+        doc = """subject: a thing in the scene, drawn in a flat colour.
+        ground: what things stand on, drawn as a grey checkerboard.
+        backdrop: walls, sky domes and distant set, described last."""
+    )
+    bool primvars:phantasos:hasFront = 0 (
+        doc = """The subject has a front, along its +Z axis, and the prompt
+        says which way it faces."""
+    )
+    asset primvars:phantasos:reference (
+        doc = """An image of what the subject should look like, given to the
+        model as a reference picture."""
+    )
+    color3f primvars:phantasos:proxyColor (
+        doc = """The colour the proxy draws this subject in, sRGB. Unset, a
+        colour is derived from the subject key, the same in every session."""
+    )
+}

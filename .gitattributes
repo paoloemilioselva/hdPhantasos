@@ -1,0 +1,10 @@
+* text=auto
+
+# cmd.exe misreads labels and GOTOs in files with bare LF line endings, so
+# batch files are always checked out with CRLF; shell scripts with LF, or bash
+# refuses the carriage returns.
+*.bat text eol=crlf
+*.sh  text eol=lf
+
+*.jpg binary
+*.png binary

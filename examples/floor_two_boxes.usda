@@ -1,0 +1,83 @@
+#usda 1.0
+(
+    doc = """A floor and two boxes, each described for hdPhantasos.
+
+    The chest is two cubes (body and lid) made one subject by the
+    PhantasosAPI on their group; the crate is one cube. Render it with:
+        render_phantasos.bat examples/floor_two_boxes.usda out.png
+    or open it with launch_phantasos.bat."""
+    defaultPrim = "World"
+    metersPerUnit = 1
+    upAxis = "Y"
+)
+
+def Xform "World"
+{
+    def Mesh "floor" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "floor"
+        string primvars:phantasos:description = "polished white marble floor tiles with thin grey veins"
+        token primvars:phantasos:role = "ground"
+
+        int[] faceVertexCounts = [4]
+        int[] faceVertexIndices = [0, 1, 2, 3]
+        point3f[] points = [(-6, 0, 6), (6, 0, 6), (6, 0, -6), (-6, 0, -6)]
+        float3[] extent = [(-6, 0, -6), (6, 0, 6)]
+    }
+
+    def Xform "chest" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "chest"
+        string primvars:phantasos:description = "an old oak chest bound in green iron, with a heavy lock"
+        bool primvars:phantasos:hasFront = 1
+
+        double3 xformOp:translate = (-1.1, 0, 0)
+        float xformOp:rotateY = 20
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY"]
+
+        def Cube "body"
+        {
+            double size = 2
+            double3 xformOp:translate = (0, 0.3, 0)
+            float3 xformOp:scale = (0.5, 0.3, 0.32)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+
+        def Cube "lid"
+        {
+            double size = 2
+            double3 xformOp:translate = (0, 0.68, 0)
+            float3 xformOp:scale = (0.52, 0.08, 0.34)
+            uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:scale"]
+        }
+    }
+
+    def Cube "crate" (
+        prepend apiSchemas = ["PhantasosAPI"]
+    )
+    {
+        string primvars:phantasos:subject = "crate"
+        string primvars:phantasos:description = "a rough pine shipping crate stencilled with faded red letters"
+
+        double size = 2
+        double3 xformOp:translate = (1.2, 0.45, -0.6)
+        float xformOp:rotateY = -15
+        float3 xformOp:scale = (0.45, 0.45, 0.45)
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateY", "xformOp:scale"]
+    }
+
+    def Camera "camera"
+    {
+        float focalLength = 35
+        float horizontalAperture = 36
+        float verticalAperture = 20.25
+        float2 clippingRange = (0.1, 1000)
+        double3 xformOp:translate = (0, 1.5, 5.5)
+        float xformOp:rotateX = -10
+        uniform token[] xformOpOrder = ["xformOp:translate", "xformOp:rotateX"]
+    }
+}
