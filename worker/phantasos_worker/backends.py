@@ -42,20 +42,24 @@ class Klein:
     patterns = ["model_index.json", "scheduler/*", "text_encoder/*", "tokenizer/*",
                 "transformer/*", "vae/*", "LICENSE.md"]
 
-    def __init__(self, allow_download, status):
-        import torch
-        from diffusers import Flux2KleinPipeline
+    @classmethod
+    def fetch(cls, allow_download, status):
+        """The model's snapshot directory, downloaded if allowed."""
         from huggingface_hub import snapshot_download
-
         status("finding FLUX.2 Klein 4B")
         try:
-            path = snapshot_download(self.repo, allow_patterns=self.patterns,
+            return snapshot_download(cls.repo, allow_patterns=cls.patterns,
                                      local_files_only=not allow_download)
         except Exception as error:  # noqa: BLE001 - reported to the delegate as is
             raise RuntimeError(
                 f"FLUX.2 Klein 4B is not downloaded ({error}). Turn on 'Allow downloads' "
                 f"(HDPHANTASOS_ALLOW_DOWNLOAD=1): about 16 GB.") from error
 
+    def __init__(self, allow_download, status):
+        import torch
+        from diffusers import Flux2KleinPipeline
+
+        path = self.fetch(allow_download, status)
         status("loading FLUX.2 Klein 4B")
         started = time.time()
         self.torch = torch

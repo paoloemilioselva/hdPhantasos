@@ -156,6 +156,28 @@ about 15 GB; Matrix-Game racing about 21.5 GB (its 10 GB checkpoint, the
 GitHub at a pinned commit, which needs git. Its log is
 `<cache>/logs/worker.log`.
 
+### Preparing a machine before usdview
+
+`prepare_phantasos.bat` (`./prepare_phantasos.sh` on Linux) does all of that
+ahead of time and waits until it is done: the venv, Matrix-Game's code, and
+every model, with progress bars, then checks each file against the Hub (size
+and SHA-256) and finishes with "everything is in place". The artist then
+needs no **Allow downloads**.
+
+```
+prepare_phantasos.bat                    everything, about 42 GB
+prepare_phantasos.bat --models klein4b   one model: klein4b or matrixgame
+prepare_phantasos.bat --quick            check files by size only (no hashing)
+prepare_phantasos.bat --check            download nothing; say what is missing (exit 1)
+```
+
+It is safe to stop and run again. A file cut short resumes. A file that
+does not match the Hub (a truncated or damaged copy) is deleted and downloaded
+again. A venv cut short is completed, and a half-fetched code checkout is
+replaced. Before downloading it checks the disk has room. Set
+`HDPHANTASOS_CACHE` first to use another disk. It needs `uv` and `git` on
+PATH.
+
 | Setting | Variable | Default |
 |---|---|---|
 | Generate pictures | `HDPHANTASOS_GENERATE` | off |
@@ -176,11 +198,13 @@ compile.bat              :: build and install into USDEXTRA (Desktop\usd-26.03-e
 compile.bat test         :: build, install, then run every test
 compile.bat core-only    :: the rasterizer and its tests, without OpenUSD
 
+prepare_phantasos.bat                                      :: the worker's venv and every model, checked
 launch_phantasos.bat [stage.usda]                          :: usdview, default: examples\city_drive.usda
 render_phantasos.bat --camera /World/camera stage.usda out.png
 ```
 
-On Linux: `python3 compile.py`, `./launch_phantasos.sh`, `./render_phantasos.sh`.
+On Linux: `python3 compile.py`, `./prepare_phantasos.sh`, `./launch_phantasos.sh`,
+`./render_phantasos.sh`.
 See [docs/building.md](docs/building.md).
 
 Settings, as render settings in usdview or environment variables for usdrecord:

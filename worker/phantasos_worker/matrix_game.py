@@ -100,7 +100,7 @@ def fetch_source(cache, allow_download, status):
 def fetch_weights(allow_download, status):
     from huggingface_hub import hf_hub_download
     if allow_download:
-        status("downloading Matrix-Game 4.0 racing (about 21.5 GB)")
+        status("fetching Matrix-Game 4.0 racing (about 21.5 GB if not yet downloaded)")
     paths = {}
     for key, ((repo, revision), name) in WEIGHTS.items():
         try:
