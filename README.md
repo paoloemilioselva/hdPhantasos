@@ -64,6 +64,27 @@ Every prim type the stage is built from works: `Mesh`, and `Cube`, `Sphere`,
 into meshes. Point and native instancing work. There are no materials or
 lights: the proxy is flat colour by design.
 
+### Editing descriptions in usdview
+
+**Phantasos > Parameters...** in usdview opens a window beside the viewport
+for the selected prims, with every PhantasosAPI parameter and its
+documentation (both read from the schema, so a parameter added to
+`schema/schema.usda` shows up there):
+
+- Each parameter's box is ticked when the selected prims author it. Tick it to
+  add it, untick it to remove it; editing a value adds it too, and applies
+  PhantasosAPI to the prim if it is missing.
+- A value the prims inherit from a group above them shows greyed, with where
+  it comes from and a **Select source** link to go and edit it there (on the
+  group, it changes the whole subject).
+- With several prims selected, an edit applies to all; values they do not
+  share show as several values.
+- Edits go to the root layer (saved with **Save**) or the session layer (gone
+  when usdview closes), and the viewport shows them at once. A change to the
+  shot starts a new Matrix-Game stream.
+- Untick **Follow selection** to keep editing the same prims while you select
+  others.
+
 ## What the delegate produces
 
 - **AOVs:** `color` (the proxy, linear), `depth`, `normal`, `primId`,

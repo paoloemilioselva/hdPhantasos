@@ -5,51 +5,63 @@
 
 class "PhantasosAPI" (
     customData = {
-        string userDocBrief = """Describes a prim, and everything under it, to the hdPhantasos
-    render delegate: which subject it is part of, what that subject looks
-    like, and what part it plays in the picture."""
+        string userDocBrief = "Describes a prim, and everything under it, to the hdPhantasos render delegate: which subject it is part of, what that subject looks like, and what part it plays in the picture."
     }
 )
 {
     string primvars:phantasos:description (
         customData = {
-            string userDocBrief = '''What the subject is and looks like, in plain words: "an old oak
-        chest bound in green iron".'''
+            string userDocBrief = 'What the subject is and looks like, in plain words: "an old oak chest bound in green iron". Say only what the thing is; the prompt writer adds where it is, how big and which way it faces. The models read this: Klein names each subject by its proxy colour and place, Matrix-Game lists it in its caption.'
         }
+        displayGroup = "Subject"
+        displayName = "Description"
     )
     bool primvars:phantasos:hasFront = 0 (
         customData = {
-            string userDocBrief = """The subject has a front, along its +Z axis, and the prompt
-        says which way it faces."""
+            string userDocBrief = "The subject has a front, along its +Z axis, and the prompt says which way it faces: toward the camera, away from it, to the left or to the right. Turn it on for cars, people, animals, furniture; off for things that look the same from every side."
         }
+        displayGroup = "Subject"
+        displayName = "Has a front"
     )
     color3f primvars:phantasos:proxyColor (
         customData = {
-            string userDocBrief = "The colour the proxy draws this subject in, sRGB."
+            string userDocBrief = "The colour the proxy draws this subject in, sRGB. Unset, a saturated colour is derived from the subject key, the same in every session. Set it to keep a colour a model reads well, or on a ground to draw it flat instead of checkered."
         }
+        displayGroup = "Proxy"
+        displayName = "Proxy colour"
     )
     asset primvars:phantasos:reference (
         customData = {
-            string userDocBrief = """An image of what the subject should look like, given to the
-        model as a reference picture."""
+            string userDocBrief = "An image of what the subject should look like, for models that take reference pictures. Recorded in the manifest; the current models (Klein, Matrix-Game) do not use it yet."
         }
+        displayGroup = "Subject"
+        displayName = "Reference image"
     )
     token primvars:phantasos:role = "subject" (
         allowedTokens = ["subject", "hero", "ground", "backdrop"]
         customData = {
-            string userDocBrief = "subject: a thing in the scene, drawn in a flat colour."
+            string userDocBrief = """What part the subject plays in the picture.
+subject: a thing in the scene, drawn in its own flat colour.
+hero: the subject the shot follows (the car being driven, the character being filmed); drawn like a subject, described first, and the \"Center: player-controlled ...\" of Matrix-Game's caption.
+ground: what things stand on, drawn as a grey checkerboard.
+backdrop: walls, sky domes and distant set; flat colour, described last."""
         }
+        displayGroup = "Subject"
+        displayName = "Role"
     )
     string primvars:phantasos:shot (
         customData = {
-            string userDocBrief = '''The whole picture in plain words: time of day, weather, light,
-        style ("Daytime city, cloudy sky").'''
+            string userDocBrief = "The whole picture in plain words: time of day, weather, light, style (\"Daytime city, cloudy sky, soft overcast light.\"). Author it on the root prim, so every mesh inherits it; the first mesh that has it gives it. Klein's prompt opens with it; Matrix-Game's caption opens with its first sentence, and a change starts a new stream."
         }
+        displayGroup = "Shot"
+        displayName = "Shot"
     )
     string primvars:phantasos:subject (
         customData = {
-            string userDocBrief = "The subject this prim belongs to."
+            string userDocBrief = "The subject this prim belongs to. Meshes with the same key are one subject: described once, drawn in one colour, counted once in the manifest. Author it on a group's Xform to make its parts one thing (a car's body and wheels). Unset, each mesh is its own subject, keyed by its path."
         }
+        displayGroup = "Subject"
+        displayName = "Subject"
     )
 }
 

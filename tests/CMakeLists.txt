@@ -20,4 +20,9 @@ if(HDPHANTASOS_BUILD_HYDRA_PLUGIN)
   # setup_usd_env.bat/.sh made; ctest started by hand needs that environment
   # sourced first.
   set_tests_properties(stage PROPERTIES SKIP_RETURN_CODE 77)
+  # The usdview editor's model, and an edit reaching the delegate live.
+  add_test(NAME parameters
+      COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/usd/parameters_test.py
+              --output ${CMAKE_CURRENT_BINARY_DIR}/parameters)
+  set_tests_properties(parameters PROPERTIES SKIP_RETURN_CODE 77)
 endif()

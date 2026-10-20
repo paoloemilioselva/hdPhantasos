@@ -13,6 +13,11 @@
     the UI; the data travels as primvars either way, and constant primvars
     are inherited down the namespace, so describing a group's Xform covers
     every mesh under it.
+
+    Each property's documentation is its customData userDocBrief, written in
+    full: usdGenSchema keeps only the first sentence of a `doc` in the
+    registry, and the registry is what tools (the usdview editor in
+    usdview/) show.
     """
     subLayers = [
         @usd/schema.usda@
@@ -33,46 +38,62 @@ class "PhantasosAPI" (
     inherits = </APISchemaBase>
     customData = {
         token apiSchemaType = "singleApply"
+        string userDocBrief = """Describes a prim, and everything under it, to the hdPhantasos render delegate: which subject it is part of, what that subject looks like, and what part it plays in the picture."""
     }
-    doc = """Describes a prim, and everything under it, to the hdPhantasos
-    render delegate: which subject it is part of, what that subject looks
-    like, and what part it plays in the picture."""
 )
 {
     string primvars:phantasos:subject (
-        doc = """The subject this prim belongs to. Meshes with the same key are
-        one subject, described once and drawn in one colour: author it on a
-        group's Xform to make its parts one thing. Unset, each mesh is its own
-        subject, keyed by its path."""
+        displayName = "Subject"
+        displayGroup = "Subject"
+        customData = {
+            string userDocBrief = """The subject this prim belongs to. Meshes with the same key are one subject: described once, drawn in one colour, counted once in the manifest. Author it on a group's Xform to make its parts one thing (a car's body and wheels). Unset, each mesh is its own subject, keyed by its path."""
+        }
     )
     string primvars:phantasos:description (
-        doc = """What the subject is and looks like, in plain words: "an old oak
-        chest bound in green iron". The prompt writer places it in the shot;
-        the description should say only what the thing is."""
+        displayName = "Description"
+        displayGroup = "Subject"
+        customData = {
+            string userDocBrief = """What the subject is and looks like, in plain words: "an old oak chest bound in green iron". Say only what the thing is; the prompt writer adds where it is, how big and which way it faces. The models read this: Klein names each subject by its proxy colour and place, Matrix-Game lists it in its caption."""
+        }
     )
     token primvars:phantasos:role = "subject" (
+        displayName = "Role"
+        displayGroup = "Subject"
         allowedTokens = ["subject", "hero", "ground", "backdrop"]
-        doc = """subject: a thing in the scene, drawn in a flat colour.
-        hero: the subject the shot follows (the car being driven, the
-        character being filmed), drawn like a subject and described first.
-        ground: what things stand on, drawn as a grey checkerboard.
-        backdrop: walls, sky domes and distant set, described last."""
+        customData = {
+            string userDocBrief = """What part the subject plays in the picture.
+subject: a thing in the scene, drawn in its own flat colour.
+hero: the subject the shot follows (the car being driven, the character being filmed); drawn like a subject, described first, and the "Center: player-controlled ..." of Matrix-Game's caption.
+ground: what things stand on, drawn as a grey checkerboard.
+backdrop: walls, sky domes and distant set; flat colour, described last."""
+        }
     )
     bool primvars:phantasos:hasFront = 0 (
-        doc = """The subject has a front, along its +Z axis, and the prompt
-        says which way it faces."""
+        displayName = "Has a front"
+        displayGroup = "Subject"
+        customData = {
+            string userDocBrief = """The subject has a front, along its +Z axis, and the prompt says which way it faces: toward the camera, away from it, to the left or to the right. Turn it on for cars, people, animals, furniture; off for things that look the same from every side."""
+        }
     )
     asset primvars:phantasos:reference (
-        doc = """An image of what the subject should look like, given to the
-        model as a reference picture."""
-    )
-    string primvars:phantasos:shot (
-        doc = """The whole picture in plain words: time of day, weather, light,
-        style ("Daytime city, cloudy sky"). Author it on the root prim, so
-        every mesh inherits it; the first mesh that has it gives it."""
+        displayName = "Reference image"
+        displayGroup = "Subject"
+        customData = {
+            string userDocBrief = """An image of what the subject should look like, for models that take reference pictures. Recorded in the manifest; the current models (Klein, Matrix-Game) do not use it yet."""
+        }
     )
     color3f primvars:phantasos:proxyColor (
-        doc = """The colour the proxy draws this subject in, sRGB. Unset, a
-        colour is derived from the subject key, the same in every session."""
+        displayName = "Proxy colour"
+        displayGroup = "Proxy"
+        customData = {
+            string userDocBrief = """The colour the proxy draws this subject in, sRGB. Unset, a saturated colour is derived from the subject key, the same in every session. Set it to keep a colour a model reads well, or on a ground to draw it flat instead of checkered."""
+        }
+    )
+    string primvars:phantasos:shot (
+        displayName = "Shot"
+        displayGroup = "Shot"
+        customData = {
+            string userDocBrief = """The whole picture in plain words: time of day, weather, light, style ("Daytime city, cloudy sky, soft overcast light."). Author it on the root prim, so every mesh inherits it; the first mesh that has it gives it. Klein's prompt opens with it; Matrix-Game's caption opens with its first sentence, and a change starts a new stream."""
+        }
     )
 }

@@ -1,0 +1,16 @@
+{
+    "Plugins": [
+        {
+            "Info": {
+                "Types": {
+                    "phantasosUsdview.PhantasosPluginContainer": {
+                        "bases": ["pxr.Usdviewq.plugin.PluginContainer"],
+                        "displayName": "Phantasos"
+                    }
+                }
+            },
+            "Name": "phantasosUsdview",
+            "Type": "python"
+        }
+    ]
+}

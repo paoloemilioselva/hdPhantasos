@@ -61,6 +61,7 @@ if(HDPHANTASOS_BUILD_HYDRA_PLUGIN)
   include(OpenUSD)
   add_subdirectory(src/hydra)
   add_subdirectory(schema)
+  add_subdirectory(usdview)
 endif()
 
 if(BUILD_TESTING)
