@@ -751,7 +751,8 @@ bool HdPhantasosWorkerLink::_Start(std::string* error)
     const std::string log = (cache / "logs" / "worker.log").string();
 
     std::string python = _options.python;
-    if (python.empty()) {
+    const bool ownVenv = python.empty();
+    if (ownVenv) {
 #if defined(_WIN32)
         python = (cache / "venv" / "Scripts" / "python.exe").string();
 #else
@@ -796,9 +797,15 @@ bool HdPhantasosWorkerLink::_Start(std::string* error)
     const std::string shared =
         (cache / "run" / ("frames-" + std::to_string(reinterpret_cast<std::uintptr_t>(this)) + ".bin")).string();
     if (!process->Map(shared, error)) return false;
-    std::vector<std::string> command = {
-        python, "-u", (fs::path(_options.workerDirectory) / "run_worker.py").string(),
-        "--cache", cache.string(), "--shared", shared};
+    // The venv's Python ignores PYTHONPATH and the other PYTHON* variables
+    // (-E) and the user's site-packages (-s): the host's environment sets
+    // them for its own Python, and their packages, built for another
+    // version, would come before the venv's. A Python named by
+    // HDPHANTASOS_WORKER_PYTHON keeps them: it may need them.
+    std::vector<std::string> command = {python, "-u"};
+    if (ownVenv) command.insert(command.end(), {"-E", "-s"});
+    command.insert(command.end(), {(fs::path(_options.workerDirectory) / "run_worker.py").string(),
+                                   "--cache", cache.string(), "--shared", shared});
     if (_options.allowDownload) command.push_back("--allow-download");
     if (!process->Start(command, log, error)) return false;
 

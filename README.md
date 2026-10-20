@@ -154,7 +154,9 @@ then the first use makes the venv with [uv](https://docs.astral.sh/uv/)
 about 15 GB; Matrix-Game racing about 21.5 GB (its 10 GB checkpoint, the
 11.4 GB umT5-XXL text encoder, the TAEHV codec), plus its inference code from
 GitHub at a pinned commit, which needs git. Its log is
-`<cache>/logs/worker.log`.
+`<cache>/logs/worker.log`. The venv's Python ignores `PYTHONPATH` and the user's
+site-packages, so the packages an OpenUSD environment sets up for its own Python
+(a Pillow built for another version, say) never come before the venv's.
 
 ### Preparing a machine before usdview
 

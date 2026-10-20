@@ -241,6 +241,33 @@ def test_generation_echo(usdrecord, output):
           "the prompt does not carry the chest's description")
 
 
+def test_worker_ignores_python_path(usdrecord, output):
+    """The worker's own venv must not see the host's PYTHONPATH: an OpenUSD
+    environment puts its packages there, built for its own Python (on Linux,
+    a Pillow whose _imaging does not load in the venv's 3.12). Here
+    PYTHONPATH leads to a PIL that fails to import; the echo model, run by
+    the venv's Python, must still answer. Needs the venv: skipped without."""
+    sys.path.insert(0, os.path.join(ROOT, "worker"))
+    from setup_worker import default_cache, venv_python
+    cache = os.environ.get("HDPHANTASOS_CACHE") or default_cache()
+    if not os.path.isfile(venv_python(cache)):
+        print(f"no worker venv in {cache}: skipping the PYTHONPATH check")
+        return
+    out = os.path.join(output, "worker_python_path")
+    broken = os.path.join(out, "pythonpath", "PIL")
+    os.makedirs(broken, exist_ok=True)
+    with open(os.path.join(broken, "__init__.py"), "w", encoding="utf-8") as handle:
+        handle.write("raise ImportError(\"cannot import name '_imaging' from 'PIL' (the host's Pillow)\")\n")
+    python_path = os.pathsep.join(p for p in [os.path.dirname(broken), os.environ.get("PYTHONPATH")] if p)
+    stage = os.path.join(ROOT, "examples", "floor_two_boxes.usda")
+    environment = {"HDPHANTASOS_GENERATE": "1", "HDPHANTASOS_MODEL": "echo",
+                   "HDPHANTASOS_GENERATE_TIMEOUT": "120", "PYTHONPATH": python_path,
+                   "HDPHANTASOS_WORKER_PYTHON": ""}  # empty: the venv's Python
+    render(usdrecord, stage, out, settings=environment)
+    check(os.path.isfile(os.path.join(out, "generated.png")),
+          "the worker's venv picked up PIL from PYTHONPATH: no generated.png")
+
+
 def test_generation_stream(usdrecord, output):
     """A streaming model paints behind the proxy: the echo-stream model
     answers each request with the previous one's picture. usdrecord must
@@ -292,6 +319,7 @@ def main():
     test_city_drive(usdrecord, args.output)
     test_generation_echo(usdrecord, args.output)
     test_generation_stream(usdrecord, args.output)
+    test_worker_ignores_python_path(usdrecord, args.output)
     print(f"stage: {len(failures)} failures")
     return 1 if failures else 0
 

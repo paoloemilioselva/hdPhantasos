@@ -47,6 +47,13 @@ def venv_python(cache):
     return os.path.join(cache, "venv", "bin", "python")
 
 
+# Run the venv's Python without PYTHONPATH and the other PYTHON* variables
+# (-E) and without the user's site-packages (-s), as the delegate does: an
+# OpenUSD environment sets them for its own Python, and its packages would
+# come before the venv's.
+ISOLATED = ["-E", "-s"]
+
+
 def run(command):
     print("[setup_worker]", " ".join(command), file=sys.stderr, flush=True)
     subprocess.run(command, check=True)
@@ -66,14 +73,14 @@ def main():
         if not os.path.isfile(python):
             print(f"[setup_worker] no venv in {args.cache}", file=sys.stderr)
             return 1
-        result = subprocess.run([python, "-c", "import torch, diffusers, transformers, einops, sentencepiece; "
+        result = subprocess.run([python, *ISOLATED, "-c", "import torch, diffusers, transformers, einops, sentencepiece; "
                                  "print('[setup_worker] venv: torch', torch.__version__, "
                                  "'CUDA' if torch.cuda.is_available() else 'NO CUDA')"])
         if result.returncode != 0:
             print("[setup_worker] the venv is incomplete: run without --check", file=sys.stderr)
             return 1
         if args.models:
-            return subprocess.run([python, os.path.join(here, "prepare_models.py"), "--cache", args.cache,
+            return subprocess.run([python, *ISOLATED, os.path.join(here, "prepare_models.py"), "--cache", args.cache,
                                    "--models", args.models, "--check"]).returncode
         return 0
 
@@ -94,7 +101,7 @@ def main():
     run([uv, "pip", "install", "--python", python, *REQUIREMENTS])
     print(f"[setup_worker] ready: {python}", file=sys.stderr)
     if args.models:
-        command = [python, os.path.join(here, "prepare_models.py"), "--cache", args.cache,
+        command = [python, *ISOLATED, os.path.join(here, "prepare_models.py"), "--cache", args.cache,
                    "--models", args.models]
         if args.quick:
             command.append("--quick")
