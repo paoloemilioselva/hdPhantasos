@@ -64,6 +64,11 @@ class "PhantasosAPI" (
         doc = """An image of what the subject should look like, given to the
         model as a reference picture."""
     )
+    string primvars:phantasos:shot (
+        doc = """The whole picture in plain words: time of day, weather, light,
+        style ("Daytime city, cloudy sky"). Author it on the root prim, so
+        every mesh inherits it; the first mesh that has it gives it."""
+    )
     color3f primvars:phantasos:proxyColor (
         doc = """The colour the proxy draws this subject in, sRGB. Unset, a
         colour is derived from the subject key, the same in every session."""

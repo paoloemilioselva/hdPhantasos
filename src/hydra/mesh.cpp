@@ -176,6 +176,7 @@ void HdPhantasosMesh::Sync(HdSceneDelegate* sceneDelegate, HdRenderParam* render
         // parts of a chest become one subject.
         phantasos::Subject subject;
         subject.key = id.GetString();
+        _record.shot.clear();
         for (const HdPrimvarDescriptor& descriptor :
              GetPrimvarDescriptors(sceneDelegate, HdInterpolationConstant)) {
             const TfToken& name = descriptor.name;
@@ -192,6 +193,8 @@ void HdPhantasosMesh::Sync(HdSceneDelegate* sceneDelegate, HdRenderParam* render
                 AsBool(GetPrimvar(sceneDelegate, name), &subject.hasFront);
             } else if (name == HdPhantasosTokens->proxyColor) {
                 subject.hasColor = AsColor(GetPrimvar(sceneDelegate, name), subject.color);
+            } else if (name == HdPhantasosTokens->shot) {
+                AsString(GetPrimvar(sceneDelegate, name), &_record.shot);
             } else if (name == HdPhantasosTokens->role) {
                 std::string role;
                 AsString(GetPrimvar(sceneDelegate, name), &role);

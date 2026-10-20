@@ -36,6 +36,9 @@ struct HdPhantasosMeshRecord {
     /// The subject this mesh belongs to. `subject.key` is the authored
     /// phantasos:subject, or the mesh's own path when there is none.
     phantasos::Subject subject;
+    /// phantasos:shot, the whole picture's description, usually authored on
+    /// the root prim and so inherited by every mesh.
+    std::string shot;
 };
 
 /// The scene as the meshes publish it during Sync, read by the render pass.

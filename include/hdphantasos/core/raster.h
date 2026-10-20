@@ -150,10 +150,12 @@ std::vector<SubjectView> MeasureSubjects(const std::vector<DrawItem>& items,
                                          const Frame& frame);
 
 /// The frame's subjects and what is seen of them, as JSON: what the worker
-/// will turn into a prompt.
+/// turns into a prompt. `shot` describes the whole picture (time of day,
+/// weather, style), from the stage's phantasos:shot.
 std::string ManifestJson(const std::vector<Subject>& subjects,
                          const std::vector<SubjectView>& views,
-                         const Camera& camera, int width, int height);
+                         const Camera& camera, int width, int height,
+                         const std::string& shot = {});
 
 /// The proxy as 8-bit sRGB, top row first: the guide a model is given.
 std::vector<std::uint8_t> ProxyRgb8(const Frame& frame);

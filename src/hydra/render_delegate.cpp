@@ -8,7 +8,10 @@
 
 #include "pxr/base/gf/vec3f.h"
 #include "pxr/base/gf/vec4f.h"
+#include "pxr/base/plug/plugin.h"
+#include "pxr/base/plug/registry.h"
 #include "pxr/base/tf/getenv.h"
+#include "pxr/base/tf/pathUtils.h"
 #include "pxr/imaging/hd/bprim.h"
 #include "pxr/imaging/hd/camera.h"
 #include "pxr/imaging/hd/resourceRegistry.h"
@@ -36,7 +39,41 @@ bool EnvBool(const char* name, bool fallback)
     return text == "1" || text == "true" || text == "on" || text == "yes";
 }
 
+std::string EnvString(const char* name, const char* fallback)
+{
+    const std::string text = TfGetenv(name);
+    return text.empty() ? fallback : text;
+}
+
+/// The worker's code, installed beside the plugin's plugInfo.json.
+std::string WorkerDirectory()
+{
+    if (const PlugPluginPtr plugin = PlugRegistry::GetInstance().GetPluginWithName("hdPhantasos")) {
+        return TfStringCatPaths(plugin->GetResourcePath(), "worker");
+    }
+    return {};
+}
+
 }  // namespace
+
+HdPhantasosWorkerLink* HdPhantasosRenderDelegate::WorkerLink()
+{
+    const bool allowDownload = GetRenderSetting<bool>(HdPhantasosTokens->allowDownload, false);
+    std::lock_guard<std::mutex> lock(_workerMutex);
+    if (!_worker || allowDownload != _workerAllowsDownload) {
+        _worker.reset();
+        HdPhantasosWorkerLink::Options options;
+        options.cache = HdPhantasosWorkerLink::DefaultCache();
+        options.workerDirectory = WorkerDirectory();
+        // A Python of one's own instead of the venv's: for tests, which run
+        // the echo model with nothing but Pillow.
+        options.python = TfGetenv("HDPHANTASOS_WORKER_PYTHON");
+        options.allowDownload = allowDownload;
+        _worker = std::make_unique<HdPhantasosWorkerLink>(options);
+        _workerAllowsDownload = allowDownload;
+    }
+    return _worker.get();
+}
 
 HdPhantasosRenderDelegate::HdPhantasosRenderDelegate() : HdRenderDelegate()
 {
@@ -70,6 +107,17 @@ void HdPhantasosRenderDelegate::_Initialize()
          VtValue(EnvBool("HDPHANTASOS_PROXY_CLAY", false))},
         {"Ground checker size (world units)", HdPhantasosTokens->checkerSize,
          VtValue(EnvFloat("HDPHANTASOS_CHECKER_SIZE", 1.0f))},
+        {"Generate pictures (model worker)", HdPhantasosTokens->generate,
+         VtValue(EnvBool("HDPHANTASOS_GENERATE", false))},
+        {"Model (klein4b, echo)", HdPhantasosTokens->model,
+         VtValue(EnvString("HDPHANTASOS_MODEL", "klein4b"))},
+        {"Picture size (long side, pixels)", HdPhantasosTokens->generateSize,
+         VtValue(static_cast<int>(EnvFloat("HDPHANTASOS_GENERATE_SIZE", 512)))},
+        {"Seed", HdPhantasosTokens->seed, VtValue(static_cast<int>(EnvFloat("HDPHANTASOS_SEED", 0)))},
+        {"Style (added to the prompt)", HdPhantasosTokens->style,
+         VtValue(EnvString("HDPHANTASOS_STYLE", ""))},
+        {"Allow downloads (worker setup, model weights)", HdPhantasosTokens->allowDownload,
+         VtValue(EnvBool("HDPHANTASOS_ALLOW_DOWNLOAD", false))},
     };
     _PopulateDefaultSettings(_settingDescriptors);
 }

@@ -14,6 +14,7 @@ add_library(hdPhantasos MODULE
     render_pass.cpp
     renderer_plugin.cpp
     scene_store.cpp
+    worker_link.cpp
 )
 
 target_include_directories(hdPhantasos PRIVATE
@@ -74,6 +75,20 @@ file(GENERATE
 file(GENERATE
     OUTPUT "${CMAKE_BINARY_DIR}/plugin/usd/plugInfo.json"
     CONTENT "{\n    \"Includes\": [ \"*/resources/\" ]\n}\n")
+
+# The model worker's Python code goes beside the plugin's resources, where the
+# delegate finds it through Plug and runs it with the worker venv's Python.
+add_custom_command(TARGET hdPhantasos POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_SOURCE_DIR}/worker"
+            "${HDPHANTASOS_PLUGIN_RESOURCES}/worker"
+    COMMENT "hdPhantasos: copying the model worker into the plugin tree"
+    VERBATIM
+)
+install(DIRECTORY "${CMAKE_SOURCE_DIR}/worker/"
+    DESTINATION "plugin/usd/hdPhantasos/resources/worker"
+    PATTERN "__pycache__" EXCLUDE
+    PATTERN "tests" EXCLUDE)
 
 install(TARGETS hdPhantasos
     LIBRARY DESTINATION "plugin/usd"

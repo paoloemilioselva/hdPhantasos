@@ -788,7 +788,7 @@ void AppendNumbers(std::string* out, const float* values, int count)
 
 std::string ManifestJson(const std::vector<Subject>& subjects,
                          const std::vector<SubjectView>& views,
-                         const Camera& camera, int width, int height)
+                         const Camera& camera, int width, int height, const std::string& shot)
 {
     Matrix4 viewToWorld;
     Invert(camera.worldToView, &viewToWorld);
@@ -803,6 +803,8 @@ std::string ManifestJson(const std::vector<Subject>& subjects,
     AppendNumber(&out, width);
     out += ",\n  \"height\": ";
     AppendNumber(&out, height);
+    out += ",\n  \"shot\": ";
+    AppendString(&out, shot);
     out += ",\n  \"camera\": {\"position\": ";
     AppendNumbers(&out, eye, 3);
     out += ", \"forward\": ";

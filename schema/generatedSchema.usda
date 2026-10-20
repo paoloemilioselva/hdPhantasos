@@ -40,6 +40,12 @@ class "PhantasosAPI" (
             string userDocBrief = "subject: a thing in the scene, drawn in a flat colour."
         }
     )
+    string primvars:phantasos:shot (
+        customData = {
+            string userDocBrief = '''The whole picture in plain words: time of day, weather, light,
+        style ("Daytime city, cloudy sky").'''
+        }
+    )
     string primvars:phantasos:subject (
         customData = {
             string userDocBrief = "The subject this prim belongs to."

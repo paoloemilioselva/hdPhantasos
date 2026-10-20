@@ -9,9 +9,6 @@
     60 m in 120 frames at 24 fps; the camera follows it.
 
     Written by examples/make_city_drive.py: edit that and run it again."""
-    customLayerData = {
-        string "phantasos:shot" = "Daytime city, cloudy sky. A third-person driving view behind a modern four-door sedan in the right-hand lane of a city street, between multi-storey buildings."
-    }
     defaultPrim = "World"
     metersPerUnit = 1
     upAxis = "Y"
@@ -21,8 +18,12 @@
     framesPerSecond = 24
 )
 
-def Xform "World"
+def Xform "World" (
+    prepend apiSchemas = ["PhantasosAPI"]
+)
 {
+    string primvars:phantasos:shot = "Daytime city, cloudy sky, soft overcast light. A third-person driving view behind a modern four-door sedan in the right-hand lane of a city street, between multi-storey buildings. Photographic, realistic."
+
     def Mesh "ground" (
         prepend apiSchemas = ["PhantasosAPI"]
     )

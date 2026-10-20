@@ -206,6 +206,35 @@ def test_city_drive(usdrecord, output):
     check(buildings >= 10, f"only {buildings} buildings in view")
 
 
+def test_generation_echo(usdrecord, output):
+    """The whole generation path, without a GPU: the delegate starts the
+    worker (with this Python, which has Pillow), the proxy goes through the
+    shared file, the echo model sends back a grey half-size copy, and the
+    picture replaces the proxy in usdrecord's image."""
+    stage = os.path.join(ROOT, "examples", "floor_two_boxes.usda")
+    out = os.path.join(output, "generation_echo")
+    manifest, proxy, recorded = render(usdrecord, stage, out, settings={
+        "HDPHANTASOS_GENERATE": "1", "HDPHANTASOS_MODEL": "echo",
+        "HDPHANTASOS_WORKER_PYTHON": sys.executable, "HDPHANTASOS_GENERATE_TIMEOUT": "120"})
+    if manifest is None:
+        return
+    from PIL import Image
+    generated_path = os.path.join(out, "generated.png")
+    check(os.path.isfile(generated_path), "no generated.png: the worker did not answer")
+    if not os.path.isfile(generated_path):
+        return
+    generated = Image.open(generated_path).convert("RGB")
+    check(generated.size == (proxy.size[0] // 2, proxy.size[1] // 2),
+          f"the echo picture is {generated.size}, expected half of {proxy.size}")
+    grey = lambda image: all(r == g == b for r, g, b in list(image.getdata())[::53])
+    check(grey(generated), "the echo picture is not grey")
+    check(recorded is not None and grey(recorded),
+          "usdrecord's image is not the generated picture")
+    prompt_path = os.path.join(out, "prompt.txt")
+    check(os.path.isfile(prompt_path) and "old oak chest" in open(prompt_path, encoding="utf-8").read(),
+          "the prompt does not carry the chest's description")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
@@ -225,6 +254,7 @@ def main():
     test_floor_two_boxes(usdrecord, args.output)
     test_implicit_and_instances(usdrecord, args.output)
     test_city_drive(usdrecord, args.output)
+    test_generation_echo(usdrecord, args.output)
     print(f"stage: {len(failures)} failures")
     return 1 if failures else 0
 

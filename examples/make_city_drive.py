@@ -25,6 +25,10 @@ ROAD_HALF = 5.0           # road from -5 to +5 in x
 KERB = 8.0                # sidewalks from 5 to 8; buildings start beyond
 STREET_START, STREET_END = 40.0, -260.0
 
+SHOT = ("Daytime city, cloudy sky, soft overcast light. A third-person driving view behind a "
+        "modern four-door sedan in the right-hand lane of a city street, between multi-storey "
+        "buildings. Photographic, realistic.")
+
 # One description per building, in order down each side of the street.
 LEFT_BUILDINGS = [
     "a dark grey glass office tower with narrow vertical mullions",
@@ -142,9 +146,6 @@ def main():
          f'    {travel:.0f} m in {FRAMES} frames at {FPS} fps; the camera follows it.',
          '',
          '    Written by examples/make_city_drive.py: edit that and run it again."""',
-         '    customLayerData = {',
-         '        string "phantasos:shot" = "Daytime city, cloudy sky. A third-person driving view behind a modern four-door sedan in the right-hand lane of a city street, between multi-storey buildings."',
-         '    }',
          '    defaultPrim = "World"',
          '    metersPerUnit = 1',
          '    upAxis = "Y"',
@@ -154,8 +155,13 @@ def main():
          f'    framesPerSecond = {FPS}',
          ')',
          '',
-         'def Xform "World"',
-         '{']
+         # The shot, on the root, so every mesh inherits it.
+         'def Xform "World" (',
+         '    prepend apiSchemas = ["PhantasosAPI"]',
+         ')',
+         '{',
+         f'    string primvars:phantasos:shot = "{SHOT}"',
+         '']
 
     # --- Ground: everything beyond the kerbs, the grey checkerboard.
     L += ['    def Mesh "ground" (', '        prepend apiSchemas = ["PhantasosAPI"]', '    )', '    {']

@@ -18,6 +18,7 @@ inline constexpr const char* kHdPhantasosDisplayName = "Phantasos";
     ((hasFront,       "phantasos:hasFront"))                            \
     ((reference,      "phantasos:reference"))                           \
     ((proxyColor,     "phantasos:proxyColor"))                          \
+    ((shot,           "phantasos:shot"))                                \
     /* Role values. */                                                  \
     (ground)                                                            \
     (backdrop)                                                          \
@@ -26,6 +27,12 @@ inline constexpr const char* kHdPhantasosDisplayName = "Phantasos";
     ((proxyShading,   "phantasos:proxyShading"))                        \
     ((proxyClay,      "phantasos:proxyClay"))                           \
     ((checkerSize,    "phantasos:checkerSize"))                         \
+    ((generate,       "phantasos:generate"))                            \
+    ((model,          "phantasos:model"))                               \
+    ((generateSize,   "phantasos:generateSize"))                        \
+    ((seed,           "phantasos:seed"))                                \
+    ((style,          "phantasos:style"))                               \
+    ((allowDownload,  "phantasos:allowDownload"))                       \
     /* An AOV of our own: the subject each pixel shows. */              \
     (subjectId)
 // clang-format on

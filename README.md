@@ -8,10 +8,10 @@ local PyTorch model paints the picture from both.
 Phantasos was the god who sent dreams of things (objects, landscapes, water and
 stone) rather than of people. Here he turns boxes into a world.
 
-> **Status: phase 0.** The delegate, the proxy and the descriptions work, in
-> usdview and usdrecord, on Windows; Linux has build scripts but has not been
-> compiled yet. No model is connected yet: the colour AOV is the proxy itself.
-> See [docs/roadmap.md](docs/roadmap.md).
+> **Status: phase 1.** The delegate, the proxy and the descriptions work in
+> usdview and usdrecord, and generation with FLUX.2 Klein 4B works through
+> usdrecord, on Windows. Generation in the usdview viewport and the Linux
+> build are not tested yet. See [docs/roadmap.md](docs/roadmap.md).
 
 | The example stage, as the model will see it | Pixar's Kitchen set, undescribed (1,788 meshes, 77 ms) |
 |---|---|
@@ -76,6 +76,44 @@ lights: the proxy is flat colour by design.
 The proxy follows the training proxies of Matrix-Game 4.0: flat colour per
 subject, black outlines between primitives and along creases, a grey checker
 ground and a black sky.
+
+## Generating pictures
+
+Turn on **Generate pictures** (or `HDPHANTASOS_GENERATE=1`) and the delegate
+hands each view to a model worker: the proxy goes in, a picture comes back and
+replaces the proxy in the colour AOV. The proxy shows at once while the picture
+is made; a newer view replaces a request still waiting, so orbiting never
+builds a queue. usdrecord waits for each frame's picture.
+
+The first model is **FLUX.2 [klein] 4B** (Apache-2.0, distilled to four
+steps), with the proxy as its reference image and a prompt written from the
+manifest: each subject's description, named by its proxy colour and place
+("the pink shape in the lower middle is a modern four-door sedan"), after the
+stage's `phantasos:shot`. On the RTX 5060 Ti: 1.4 s a picture at 512x288,
+3.0 s at 768x432, 12.9 GB of VRAM, 15 s to load.
+
+**Use the clay look as Klein's guide**: in a test on the city drive it gave the
+cleanest photographs, where flat colours sometimes leak into the picture as
+painted walls.
+
+The worker is a separate process with its own Python ([worker/](worker/)),
+kept in a cache (`%LOCALAPPDATA%\hdPhantasos`, `~/.cache/hdPhantasos`, or
+`HDPHANTASOS_CACHE`). Nothing is downloaded unless **Allow downloads** is on:
+then the first use makes the venv with [uv](https://docs.astral.sh/uv/)
+(PyTorch for the machine's driver, about 4 GB) and fetches the model (about
+15 GB). Its log is `<cache>/logs/worker.log`.
+
+| Setting | Variable | Default |
+|---|---|---|
+| Generate pictures | `HDPHANTASOS_GENERATE` | off |
+| Model: `klein4b`, or `echo` (no model: a grey copy, for tests) | `HDPHANTASOS_MODEL` | klein4b |
+| Picture size, long side in pixels | `HDPHANTASOS_GENERATE_SIZE` | 512 |
+| Seed | `HDPHANTASOS_SEED` | 0 |
+| Style, added to the prompt | `HDPHANTASOS_STYLE` | |
+| Allow downloads | `HDPHANTASOS_ALLOW_DOWNLOAD` | off |
+
+With `HDPHANTASOS_MANIFEST` set, each frame also writes `generated.png` and
+`prompt.txt` beside the manifest.
 
 ## Building and running
 
