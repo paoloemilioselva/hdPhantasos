@@ -79,7 +79,7 @@ Hydra updates an rprim's render tag without syncing it, and the scene
 delegate's `GetRenderTag` returned an empty tag during Sync in USD 26.03. The
 render pass asks `HdRenderIndex::GetRenderTag` for each mesh instead.
 
-### 2.5 The model will run in its own process
+### 2.5 The model runs in its own process
 
 Not inside the delegate, because:
 
@@ -88,11 +88,43 @@ Not inside the delegate, because:
 - a model crash or an out-of-memory must not take the host down;
 - the same worker can serve other tools (Frameforge, viewToPrompt).
 
-The delegate starts the worker, exchanges frames through shared memory (a
-864x480 proxy is 1.2 MB), and the worker creates its venv with `uv`, picks the
-PyTorch build for the driver, and downloads weights at pinned revisions with
-SHA256 checks, asking before any large download. Worker and delegate always
-run on the same machine.
+How it works (`src/hydra/worker_link.*`, `worker/`):
+
+- The delegate starts `worker/run_worker.py` with the venv's Python on the
+  first frame that asks for a picture, and keeps it running. Messages are
+  JSON lines on the worker's stdin and stdout; its stderr goes to
+  `<cache>/logs/worker.log`.
+- Pixels go through a memory-mapped file in `<cache>/run`: the proxy in, the
+  picture out, 8-bit RGB, up to 4K each. `worker/phantasos_worker/protocol.py`
+  has the layout.
+- One thread in the delegate does all the process I/O. Requests are newest
+  wins: one frame with the worker, and a newer one replaces a request still
+  waiting.
+- The render pass shows the proxy at once and stays unconverged, so the host
+  keeps calling, until the picture for that exact framing is back. A picture
+  that arrives for an older framing is dropped.
+- No download happens unless 'Allow downloads' is on. Then a missing venv is
+  made by `uv run setup_worker.py` (Python 3.12, PyTorch for the driver via
+  uv's `--torch-backend auto`, the model libraries), and the model weights
+  are fetched by the worker into `<cache>/hf`.
+- The worker code is the copy installed beside the plugin, put on `sys.path`
+  by `run_worker.py`; the venv holds only dependencies, so a rebuild of the
+  plugin updates the worker without a reinstall.
+
+Worker and delegate always run on the same machine.
+
+### 2.6 Klein: the proxy as reference image, the descriptions by colour
+
+FLUX.2 Klein 4B takes reference images and edits from them. The proxy is its
+reference; the prompt names each subject by its proxy colour and its place on
+a 3x3 grid ("the pink shape in the lower middle is a modern four-door
+sedan"). The grid is coarse on purpose: the prompt then changes only when the
+picture's content does, and its text-encoder pass (Qwen3-4B, int8 weights) is
+cached by text.
+
+Measured on the city drive (one frame, three looks): clay gives the most
+photographic result; flat and shaded leak flat colours into the picture
+(painted walls, a pink block for a car).
 
 ## 3. Layout
 
