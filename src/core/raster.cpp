@@ -227,6 +227,7 @@ const char* RoleName(Role role)
     switch (role) {
         case Role::Ground: return "ground";
         case Role::Backdrop: return "backdrop";
+        case Role::Hero: return "hero";
         case Role::Subject: break;
     }
     return "subject";
@@ -665,7 +666,7 @@ std::vector<SubjectView> MeasureSubjects(const std::vector<DrawItem>& items,
     const double eye[3] = {viewToWorld.m[3][0], viewToWorld.m[3][1], viewToWorld.m[3][2]};
 
     std::vector<double> sumX(subjects.size(), 0), sumY(subjects.size(), 0),
-        sumDistance(subjects.size(), 0);
+        sumDistance(subjects.size(), 0), sumPosition(subjects.size() * 3, 0);
     for (std::size_t i = 0; i < views.size(); ++i) {
         views[i].subject = static_cast<std::int32_t>(i);
         views[i].bbox[0] = views[i].bbox[1] = 1.0f;
@@ -693,6 +694,7 @@ std::vector<SubjectView> MeasureSubjects(const std::vector<DrawItem>& items,
                                  frame.position[p * 3 + 2] - eye[2]};
             const double distance = std::sqrt(Dot(d, d));
             sumDistance[s] += distance;
+            for (int c = 0; c < 3; ++c) sumPosition[s * 3 + c] += frame.position[p * 3 + c];
             view.nearest = std::min(view.nearest, static_cast<float>(distance));
         }
     }
@@ -708,6 +710,8 @@ std::vector<SubjectView> MeasureSubjects(const std::vector<DrawItem>& items,
         view.centroid[0] = static_cast<float>(sumX[i] / view.pixels);
         view.centroid[1] = static_cast<float>(sumY[i] / view.pixels);
         view.mean = static_cast<float>(sumDistance[i] / view.pixels);
+        for (int c = 0; c < 3; ++c)
+            view.position[c] = static_cast<float>(sumPosition[i * 3 + c] / view.pixels);
     }
 
     // Facing, from the first placement of each subject that has a front: its
@@ -798,6 +802,9 @@ std::string ManifestJson(const std::vector<Subject>& subjects,
     const float forward[3] = {static_cast<float>(-viewToWorld.m[2][0]),
                               static_cast<float>(-viewToWorld.m[2][1]),
                               static_cast<float>(-viewToWorld.m[2][2])};
+    const float up[3] = {static_cast<float>(viewToWorld.m[1][0]),
+                         static_cast<float>(viewToWorld.m[1][1]),
+                         static_cast<float>(viewToWorld.m[1][2])};
 
     std::string out = "{\n  \"width\": ";
     AppendNumber(&out, width);
@@ -809,6 +816,17 @@ std::string ManifestJson(const std::vector<Subject>& subjects,
     AppendNumbers(&out, eye, 3);
     out += ", \"forward\": ";
     AppendNumbers(&out, forward, 3);
+    out += ", \"up\": ";
+    AppendNumbers(&out, up, 3);
+    // Full angles of view in degrees, horizontal then vertical, from a
+    // perspective projection; zero for an orthographic one.
+    float fov[2] = {0, 0};
+    if (camera.projection.m[2][3] != 0.0) {
+        fov[0] = static_cast<float>(2.0 * std::atan(1.0 / camera.projection.m[0][0]) * 180.0 / 3.14159265358979);
+        fov[1] = static_cast<float>(2.0 * std::atan(1.0 / camera.projection.m[1][1]) * 180.0 / 3.14159265358979);
+    }
+    out += ", \"fov\": ";
+    AppendNumbers(&out, fov, 2);
     out += "},\n  \"subjects\": [";
     for (std::size_t i = 0; i < subjects.size(); ++i) {
         const Subject& subject = subjects[i];
@@ -848,7 +866,8 @@ std::string ManifestJson(const std::vector<Subject>& subjects,
         AppendNumber(&out, view.nearest);
         out += ", \"mean\": ";
         AppendNumber(&out, view.mean);
-        out += "}";
+        out += "}, \"position\": ";
+        AppendNumbers(&out, view.position, 3);
         if (view.hasFacing) {
             out += ", \"facing\": ";
             AppendString(&out, view.facing);

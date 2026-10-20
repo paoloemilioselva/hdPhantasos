@@ -18,7 +18,13 @@ import subprocess
 import sys
 
 REQUIREMENTS = ["numpy", "pillow", "accelerate", "diffusers>=0.37", "huggingface_hub",
-                "safetensors", "torchao", "transformers>=4.57"]
+                "safetensors", "torchao", "transformers>=4.57",
+                # Matrix-Game 4.0's inference code (fetched by the worker, not from PyPI)
+                "einops", "ftfy", "regex", "sentencepiece"]
+# Its GPU kernels are Triton. Linux PyTorch wheels bring Triton; on Windows it
+# is a separate build.
+if os.name == "nt":
+    REQUIREMENTS.append("triton-windows")
 
 
 def default_cache():

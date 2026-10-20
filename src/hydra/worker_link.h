@@ -10,6 +10,9 @@
 //
 // Requests are newest-wins: at most one frame is with the worker, and a newer
 // request replaces one still waiting, so a moving camera never builds a queue.
+// A streaming model answers every request with a picture, but the picture
+// may show an earlier request's proxy (Result::source): it paints a few
+// frames behind.
 // All process I/O happens on one thread owned by this object; the render pass
 // only submits and polls.
 
@@ -39,7 +42,9 @@ class HdPhantasosWorkerLink {
     };
 
     struct Result {
-        std::uint64_t key = 0;
+        std::uint64_t key = 0;     // the request this answers
+        std::uint64_t source = 0;  // the request whose proxy the picture shows
+        bool stream = false;       // from a streaming model
         int width = 0;
         int height = 0;
         std::vector<std::uint8_t> rgb;  // 8-bit sRGB, top row first
@@ -64,8 +69,8 @@ class HdPhantasosWorkerLink {
     /// Queue a frame, replacing any that has not been sent yet.
     void Submit(Request request);
 
-    /// The result for `key` once it is there, taken out of the link.
-    std::optional<Result> Take(std::uint64_t key);
+    /// The latest result, taken out of the link; empty while none is there.
+    std::optional<Result> Take();
 
     /// What the worker is doing, for render stats: "starting", "loading
     /// FLUX.2 Klein 4B", "ready", or why it failed.

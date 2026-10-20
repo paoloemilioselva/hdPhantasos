@@ -8,10 +8,11 @@ local PyTorch model paints the picture from both.
 Phantasos was the god who sent dreams of things (objects, landscapes, water and
 stone) rather than of people. Here he turns boxes into a world.
 
-> **Status: phase 1.** The delegate, the proxy and the descriptions work in
-> usdview and usdrecord, and generation with FLUX.2 Klein 4B works through
-> usdrecord, on Windows. Generation in the usdview viewport and the Linux
-> build are not tested yet. See [docs/roadmap.md](docs/roadmap.md).
+> **Status: phase 1b.** The delegate, the proxy and the descriptions work in
+> usdview and usdrecord. Generation works through usdrecord on Windows with
+> two models: FLUX.2 Klein 4B (stills) and Matrix-Game 4.0 racing
+> (streaming, about 20 frames a second). Generation in the usdview viewport
+> and the Linux build are not tested yet. See [docs/roadmap.md](docs/roadmap.md).
 
 | The example stage, as the model will see it | Pixar's Kitchen set, undescribed (1,788 meshes, 77 ms) |
 |---|---|
@@ -49,7 +50,7 @@ def Xform "chest" (prepend apiSchemas = ["PhantasosAPI"])
 |---|---|
 | `phantasos:subject` | Meshes with the same key are one subject: one description, one colour. Unset, each mesh is its own subject, keyed by its path |
 | `phantasos:description` | What the subject is and looks like, in plain words |
-| `phantasos:role` | `subject` (flat colour), `ground` (grey checkerboard), `backdrop` (flat colour, described last) |
+| `phantasos:role` | `subject` (flat colour), `hero` (the subject the shot follows, such as the car being driven: a subject, described first), `ground` (grey checkerboard), `backdrop` (flat colour, described last) |
 | `phantasos:hasFront` | The prompt says which way the subject faces |
 | `phantasos:reference` | An image of the subject, for the model as a reference picture |
 | `phantasos:proxyColor` | The proxy colour, sRGB; unset, derived from the key, the same in every session |
@@ -69,7 +70,7 @@ lights: the proxy is flat colour by design.
   `instanceId`, `elementId`, and `subjectId` (which subject each pixel shows).
 - **A manifest** for each frame when `HDPHANTASOS_MANIFEST` names a
   directory: `manifest.json` (every subject with its description and role, and
-  what the frame shows of it: coverage, box, centroid, distance, and which way
+  what the frame shows of it: coverage, box, centroid, distance, mean world position, and which way
   it faces) and `proxy.png` (the guide, 8-bit sRGB). This is what the model
   worker will read.
 
@@ -96,17 +97,49 @@ stage's `phantasos:shot`. On the RTX 5060 Ti: 1.4 s a picture at 512x288,
 cleanest photographs, where flat colours sometimes leak into the picture as
 painted walls.
 
+The second model is **Matrix-Game 4.0 racing** (SkyworkAI, Apache-2.0), a
+causal Wan2.2-5B video model distilled to one step and trained on a
+city-driving game whose proxy looks like ours. It streams: each frame the
+delegate sends goes into the next four-frame chunk, and it remembers the last
+84 frames, so a street it has painted stays the same street as the camera
+moves on. On the RTX 5060 Ti it paints 864x480 at about 20 frames a second
+(51 ms a frame) with 11.7 GB of VRAM, three frames behind the proxy. Starting
+takes about 25 s (more the first time a caption is seen). Use the **flat**
+look: it is what it was trained on. It knows one kind of world, a modern
+city street, and paints that whatever the stage says.
+
+Its caption is written in the form its game wrote them ("Daytime city, cloudy
+sky. Center: player-controlled ... Around: ... at left, ..."), from the
+stream's first frame; the subject with `phantasos:role = "hero"` is the one in
+the centre. The first frame of a stream is its anchor, kept for the whole
+stream; **Stream's first frame** chooses it:
+
+| First frame | |
+|---|---|
+| `model` (default) | Matrix-Game paints it, like any other frame |
+| `klein` | FLUX.2 Klein 4B paints it from the proxy: a better first second or two, which then drifts. Klein and Matrix-Game do not fit a 16 GB card together, so each new stream loads Klein, then Matrix-Game again (a stream then takes about 50 s to start, not 25) |
+| `release` | The image released with the checkpoint, a frame of their game: only for their own city |
+
+usdrecord waits for each frame's own picture, so a stream there is fed each
+frame until it catches up (about four times): it works, but the model sees a
+stop-motion drive, slower than real time and less steady than a live
+viewport. A proper offline sequence is phase 2.
+
 The worker is a separate process with its own Python ([worker/](worker/)),
 kept in a cache (`%LOCALAPPDATA%\hdPhantasos`, `~/.cache/hdPhantasos`, or
 `HDPHANTASOS_CACHE`). Nothing is downloaded unless **Allow downloads** is on:
 then the first use makes the venv with [uv](https://docs.astral.sh/uv/)
-(PyTorch for the machine's driver, about 4 GB) and fetches the model (about
-15 GB). Its log is `<cache>/logs/worker.log`.
+(PyTorch for the machine's driver, about 4 GB) and fetches the model: Klein
+about 15 GB; Matrix-Game racing about 21.5 GB (its 10 GB checkpoint, the
+11.4 GB umT5-XXL text encoder, the TAEHV codec), plus its inference code from
+GitHub at a pinned commit, which needs git. Its log is
+`<cache>/logs/worker.log`.
 
 | Setting | Variable | Default |
 |---|---|---|
 | Generate pictures | `HDPHANTASOS_GENERATE` | off |
-| Model: `klein4b`, or `echo` (no model: a grey copy, for tests) | `HDPHANTASOS_MODEL` | klein4b |
+| Model: `klein4b`, `matrixgame`, or `echo` / `echo-stream` (no model: a grey copy, for tests) | `HDPHANTASOS_MODEL` | klein4b |
+| Stream's first frame: `model`, `klein`, `release` (Matrix-Game only) | `HDPHANTASOS_FIRST_FRAME` | model |
 | Picture size, long side in pixels | `HDPHANTASOS_GENERATE_SIZE` | 512 |
 | Seed | `HDPHANTASOS_SEED` | 0 |
 | Style, added to the prompt | `HDPHANTASOS_STYLE` | |

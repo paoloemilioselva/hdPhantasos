@@ -20,6 +20,7 @@ inline constexpr const char* kHdPhantasosDisplayName = "Phantasos";
     ((proxyColor,     "phantasos:proxyColor"))                          \
     ((shot,           "phantasos:shot"))                                \
     /* Role values. */                                                  \
+    (hero)                                                              \
     (ground)                                                            \
     (backdrop)                                                          \
     /* Render settings. */                                              \
@@ -32,6 +33,7 @@ inline constexpr const char* kHdPhantasosDisplayName = "Phantasos";
     ((generateSize,   "phantasos:generateSize"))                        \
     ((seed,           "phantasos:seed"))                                \
     ((style,          "phantasos:style"))                               \
+    ((firstFrame,     "phantasos:firstFrame"))                          \
     ((allowDownload,  "phantasos:allowDownload"))                       \
     /* An AOV of our own: the subject each pixel shows. */              \
     (subjectId)

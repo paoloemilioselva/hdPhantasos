@@ -291,7 +291,7 @@ def main():
     L += ['    def Xform "egoCar" (', '        prepend apiSchemas = ["PhantasosAPI"]', '    )', '    {']
     L += describe(8, "ego car",
                   "a modern four-door sedan with a curved roof and a separate rear trunk, metallic dark grey",
-                  has_front=True)
+                  role="hero", has_front=True)
     L += ['        double3 xformOp:translate.timeSamples = {',
           f'            1: ({LANE_X}, 0, 0),', f'            {last}: ({LANE_X}, 0, {-travel:.2f}),', '        }',
           '        float xformOp:rotateY = 180',

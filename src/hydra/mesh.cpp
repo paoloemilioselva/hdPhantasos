@@ -202,6 +202,8 @@ void HdPhantasosMesh::Sync(HdSceneDelegate* sceneDelegate, HdRenderParam* render
                     subject.role = phantasos::Role::Ground;
                 } else if (role == HdPhantasosTokens->backdrop.GetString()) {
                     subject.role = phantasos::Role::Backdrop;
+                } else if (role == HdPhantasosTokens->hero.GetString()) {
+                    subject.role = phantasos::Role::Hero;
                 }
             }
         }

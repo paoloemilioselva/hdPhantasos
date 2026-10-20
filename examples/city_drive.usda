@@ -795,6 +795,7 @@ def Xform "World" (
     {
         string primvars:phantasos:subject = "ego car"
         string primvars:phantasos:description = "a modern four-door sedan with a curved roof and a separate rear trunk, metallic dark grey"
+        token primvars:phantasos:role = "hero"
         bool primvars:phantasos:hasFront = 1
         double3 xformOp:translate.timeSamples = {
             1: (1.6, 0, 0),

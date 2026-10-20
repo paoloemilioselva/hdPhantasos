@@ -1,6 +1,6 @@
 # Architecture
 
-Last revised 2026-10-20 (phase 0).
+Last revised 2026-10-20 (phase 1b).
 
 ## 1. What it is
 
@@ -125,6 +125,47 @@ cached by text.
 Measured on the city drive (one frame, three looks): clay gives the most
 photographic result; flat and shaded leak flat colours into the picture
 (painted walls, a pink block for a car).
+
+### 2.7 Matrix-Game 4.0: a stream, one frame in for one frame out
+
+The racing checkpoint is a causal video model: chunks of four frames, each
+painted from its proxy frames and the last 21 latent frames it painted. The
+delegate renders one frame at a time, so the worker keeps a stream
+(`worker/phantasos_worker/matrix_game.py`):
+
+- Each request's proxy joins the next chunk; when four are in, the chunk is
+  painted. Each answer is the oldest painted frame not yet shown, with the
+  id of the request whose proxy it shows (`source`). The stream runs three
+  frames behind, and the answer rate follows the requests.
+- The render pass shows every streamed picture, keeps the last one on screen
+  while the camera moves (not the proxy), and while the newest shows an
+  earlier view than the current one, sends the current proxy again until the
+  stream catches up; then it converges. In usdview the stream follows the
+  camera; usdrecord gets each frame's own picture, at the cost of feeding
+  each frame about four times.
+- A stream starts at the first frame and lasts until a setting that shapes
+  it (seed, first frame, style, the stage's shot) changes. Its caption is
+  written once, from the first frame, in the form their game writes them;
+  `phantasos:role = "hero"` marks the subject their captions put in the
+  centre, and the manifest's per-subject world position and the camera's
+  up vector give their 9-way direction bins.
+- Their RTX 5070 Ti runtime (int8 block linears, CUDA graphs) runs on the
+  RTX 5060 Ti at 51 ms a frame in 11.7 GB. It holds one caption per load, so
+  a new caption reloads the transformer (about 8 s, plus 8 s of warm-up).
+  Before Blackwell (the A4500 is Ampere) the one MXFP8 layer becomes int8.
+- Their T5 wrapper builds the 5.7B-parameter encoder in fp32 on the CPU
+  (23 GB) before loading it; the worker builds it empty and assigns the bf16
+  checkpoint, bit-identical in 12 s instead of 76. Encoded captions are
+  cached in `<cache>/captions`.
+- Their code is fetched by git at a pinned commit (a sparse checkout of the
+  inference package, 1.8 MB) into `<cache>/src`; the weights at the release
+  revisions through the Hugging Face cache.
+
+What it paints, on the city drive: it follows the camera, the road, the ego
+car, parked cars and trees, but it paints its own city (it was trained on
+one game), and in the flat look the lime-green sidewalks become green
+barriers. A Klein first frame gives a photograph of our street for a second
+or two, then drifts and smears.
 
 ## 3. Layout
 

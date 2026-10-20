@@ -42,15 +42,27 @@ def main(argv=None):
             settings = message.get("settings", {})
             name = settings.get("model", "klein4b")
             if name not in models:
+                # One model on the GPU at a time: two seldom fit.
+                models.clear()
+                backends.free_memory()
                 models[name] = backends.create(name, args.allow_download, status)
+            model = models[name]
             started = time.time()
             proxy = Image.frombytes("RGB", (width, height), link.read_input(width, height))
-            picture, prompt = models[name].generate(proxy, message.get("manifest", {}), settings)
+            manifest = message.get("manifest", {})
+            if getattr(model, "streaming", False):
+                # A stream answers with the oldest picture not yet shown, and
+                # says which request's proxy it shows.
+                picture, prompt, source = model.generate(proxy, manifest, settings, frame_id)
+            else:
+                picture, prompt = model.generate(proxy, manifest, settings)
+                source = frame_id
             picture = picture.convert("RGB")
             link.write_output(picture.tobytes(), picture.width, picture.height)
-            link.send({"op": "result", "id": frame_id, "width": picture.width,
-                       "height": picture.height, "ms": round((time.time() - started) * 1000, 1),
-                       "prompt": prompt})
+            link.send({"op": "result", "id": frame_id, "source": source,
+                       "stream": bool(getattr(model, "streaming", False)),
+                       "width": picture.width, "height": picture.height,
+                       "ms": round((time.time() - started) * 1000, 1), "prompt": prompt})
         except Exception as error:  # noqa: BLE001 - every failure goes back to the delegate
             traceback.print_exc(file=sys.stderr)
             link.send({"op": "error", "id": frame_id, "message": str(error)})

@@ -35,7 +35,7 @@ class "PhantasosAPI" (
         }
     )
     token primvars:phantasos:role = "subject" (
-        allowedTokens = ["subject", "ground", "backdrop"]
+        allowedTokens = ["subject", "hero", "ground", "backdrop"]
         customData = {
             string userDocBrief = "subject: a thing in the scene, drawn in a flat colour."
         }

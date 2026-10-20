@@ -204,6 +204,12 @@ def test_city_drive(usdrecord, output):
           "parked car 1 should be passed by the last frame")
     buildings = sum(1 for s in first["subjects"] if s["visible"] and s["key"].startswith("building"))
     check(buildings >= 10, f"only {buildings} buildings in view")
+    check(a["ego car"].get("role") == "hero", "the ego car is not the hero")
+    # The car is 1.6 to the right of the street's centre line, x = 0.
+    check(abs(a["ego car"]["position"][0] - 1.6) < 0.3,
+          f"the ego car's mean position is {a['ego car']['position']}")
+    fov = first["camera"].get("fov", [0, 0])
+    check(60 < fov[0] < 90 and 30 < fov[1] < 60, f"the camera's angles of view are {fov}")
 
 
 def test_generation_echo(usdrecord, output):
@@ -235,6 +241,36 @@ def test_generation_echo(usdrecord, output):
           "the prompt does not carry the chest's description")
 
 
+def test_generation_stream(usdrecord, output):
+    """A streaming model paints behind the proxy: the echo-stream model
+    answers each request with the previous one's picture. usdrecord must
+    still get each frame's own picture, because the delegate feeds the
+    stream the same proxy until it catches up."""
+    stage = os.path.join(ROOT, "examples", "city_drive.usda")
+    out = os.path.join(output, "generation_stream")
+    os.makedirs(out, exist_ok=True)
+    environment = dict(os.environ, HDPHANTASOS_MANIFEST=out, HDPHANTASOS_GENERATE="1",
+                       HDPHANTASOS_MODEL="echo-stream", HDPHANTASOS_WORKER_PYTHON=sys.executable,
+                       HDPHANTASOS_GENERATE_TIMEOUT="60")
+    image = os.path.join(out, "usdrecord.####.png")
+    result = subprocess.run([sys.executable, usdrecord, "--renderer", "Phantasos", "--camera",
+                             "/World/camera", "--imageWidth", "432", "--colorCorrectionMode", "sRGB",
+                             "--frames", "1:120x119", stage, image],
+                            env=environment, capture_output=True, text=True)
+    check(result.returncode == 0 and "no picture" not in result.stderr,
+          f"usdrecord failed or timed out on the stream: {result.stderr[-400:]}")
+    from PIL import Image, ImageChops, ImageOps, ImageStat
+    last = os.path.join(out, "usdrecord.0120.png")
+    if not os.path.isfile(last):
+        check(False, "no frame 120 from the stream")
+        return
+    recorded = Image.open(last).convert("RGB")
+    proxy = Image.open(os.path.join(out, "proxy.png")).convert("RGB")
+    expected = ImageOps.grayscale(proxy).convert("RGB").resize(recorded.size)
+    difference = sum(ImageStat.Stat(ImageChops.difference(recorded, expected)).mean) / 3
+    check(difference < 12, f"frame 120 is not frame 120's picture (mean difference {difference:.1f})")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", required=True)
@@ -255,6 +291,7 @@ def main():
     test_implicit_and_instances(usdrecord, args.output)
     test_city_drive(usdrecord, args.output)
     test_generation_echo(usdrecord, args.output)
+    test_generation_stream(usdrecord, args.output)
     print(f"stage: {len(failures)} failures")
     return 1 if failures else 0
 

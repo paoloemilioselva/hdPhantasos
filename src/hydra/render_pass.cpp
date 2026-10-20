@@ -270,6 +270,7 @@ void HdPhantasosRenderPass::_Execute(const HdRenderPassStateSharedPtr& renderPas
     // the host calling until its picture is here.
     if (!_renderDelegate->GetRenderSetting<bool>(HdPhantasosTokens->generate, false)) {
         _awaitingKey = 0;
+        _streamColor.clear();
         _SetConverged(targets, true);
         return;
     }
@@ -283,6 +284,13 @@ void HdPhantasosRenderPass::_Execute(const HdRenderPassStateSharedPtr& renderPas
     std::replace(request.manifest.begin(), request.manifest.end(), '\n', ' ');
     const std::string model =
         _renderDelegate->GetRenderSetting<std::string>(HdPhantasosTokens->model, "klein4b");
+    if (model != _streamModel) _streamColor.clear();
+    _streamModel = model;
+    if (!_streamColor.empty() && _streamWidth == width && _streamHeight == height) {
+        for (const Target& target : targets) {
+            if (target.name == HdAovTokens->color) target.buffer->WriteFloats(_streamColor, 4, true);
+        }
+    }
     const std::string extraStyle =
         _renderDelegate->GetRenderSetting<std::string>(HdPhantasosTokens->style, "");
     request.settings =
@@ -290,17 +298,28 @@ void HdPhantasosRenderPass::_Execute(const HdRenderPassStateSharedPtr& renderPas
         ", \"size\": " + std::to_string(_renderDelegate->GetRenderSetting<int>(HdPhantasosTokens->generateSize, 512)) +
         ", \"seed\": " + std::to_string(_renderDelegate->GetRenderSetting<int>(HdPhantasosTokens->seed, 0)) +
         ", \"steps\": 4, \"look\": " + HdPhantasosJsonQuote(phantasos::LookName(style.look)) +
-        ", \"style\": " + HdPhantasosJsonQuote(extraStyle) + "}";
+        ", \"style\": " + HdPhantasosJsonQuote(extraStyle) +
+        ", \"firstFrame\": " + HdPhantasosJsonQuote(_renderDelegate->GetRenderSetting<std::string>(
+                                     HdPhantasosTokens->firstFrame, "model")) + "}";
+    _lastRequest = request;
     _renderDelegate->WorkerLink()->Submit(std::move(request));
     _awaitingKey = _nextKey;
+    _viewKey = _nextKey;
     _submitted = std::chrono::steady_clock::now();
     _SetConverged(targets, false);
+    // A stream may have a picture ready already: show it now, not after the
+    // camera stops. (A still for an earlier view is dropped there.)
+    _PollGeneration(targets);
 }
 
 void HdPhantasosRenderPass::_PollGeneration(const std::vector<Target>& targets)
 {
     HdPhantasosWorkerLink* link = _renderDelegate->WorkerLink();
-    std::optional<HdPhantasosWorkerLink::Result> result = link->Take(_awaitingKey);
+    std::optional<HdPhantasosWorkerLink::Result> result = link->Take();
+    if (result && !result->stream && result->key != _awaitingKey) {
+        // A still for a view the camera has left: not worth showing.
+        result.reset();
+    }
     if (!result) {
         // Bounded, so a render-until-converged host such as usdrecord cannot
         // wait forever on a worker that never answers. The first frame of a
@@ -319,6 +338,9 @@ void HdPhantasosRenderPass::_PollGeneration(const std::vector<Target>& targets)
         return;
     }
     _awaitingKey = 0;
+    // A stream that has not reached the current view yet is fed the same
+    // proxy again; its picture is shown meanwhile.
+    const bool behind = result->stream && result->error.empty() && result->source < _viewKey;
 
     VtDictionary record = _renderDelegate->GetRenderStats();
     record["phantasos:worker"] = VtValue(link->Status());
@@ -372,6 +394,13 @@ void HdPhantasosRenderPass::_PollGeneration(const std::vector<Target>& targets)
             target.buffer->WriteFloats(color, 4, true);
         }
     }
+    if (result->stream) {
+        _streamColor = std::move(color);
+        _streamWidth = width;
+        _streamHeight = height;
+    } else {
+        _streamColor.clear();
+    }
 
     const std::string manifestDirectory = TfGetenv("HDPHANTASOS_MANIFEST");
     if (!manifestDirectory.empty() && MakeDirectory(manifestDirectory)) {
@@ -383,6 +412,15 @@ void HdPhantasosRenderPass::_PollGeneration(const std::vector<Target>& targets)
     record["phantasos:generateMilliseconds"] = VtValue(result->milliseconds);
     record["phantasos:prompt"] = VtValue(result->prompt);
     _renderDelegate->RecordFrame(record);
+    if (behind) {
+        HdPhantasosWorkerLink::Request again = _lastRequest;
+        again.key = ++_nextKey;
+        link->Submit(std::move(again));
+        _awaitingKey = _nextKey;
+        _submitted = std::chrono::steady_clock::now();
+        _SetConverged(targets, false);
+        return;
+    }
     _SetConverged(targets, true);
 }
 

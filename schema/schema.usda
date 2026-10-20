@@ -51,8 +51,10 @@ class "PhantasosAPI" (
         the description should say only what the thing is."""
     )
     token primvars:phantasos:role = "subject" (
-        allowedTokens = ["subject", "ground", "backdrop"]
+        allowedTokens = ["subject", "hero", "ground", "backdrop"]
         doc = """subject: a thing in the scene, drawn in a flat colour.
+        hero: the subject the shot follows (the car being driven, the
+        character being filmed), drawn like a subject and described first.
         ground: what things stand on, drawn as a grey checkerboard.
         backdrop: walls, sky domes and distant set, described last."""
     )

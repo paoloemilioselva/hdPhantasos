@@ -3,6 +3,7 @@
 #include "api.h"
 
 #include "hdphantasos/core/raster.h"
+#include "worker_link.h"
 
 #include "pxr/base/gf/matrix4d.h"
 #include "pxr/imaging/hd/renderPass.h"
@@ -26,6 +27,10 @@ class HdPhantasosRenderBuffer;
 /// shown at once and handed to the model worker; the pass stays unconverged,
 /// so the host keeps calling, until the worker's picture replaces the proxy
 /// in the colour AOV. A newer view replaces a request still waiting.
+///
+/// A streaming model (Matrix-Game) paints a few frames behind: every picture
+/// it sends is shown, and while the newest shows an older view than the
+/// current one, the current proxy is sent again so the stream catches up.
 class HDPHANTASOS_API HdPhantasosRenderPass final : public HdRenderPass {
   public:
     HdPhantasosRenderPass(HdRenderIndex* index, const HdRprimCollection& collection,
@@ -65,9 +70,18 @@ class HDPHANTASOS_API HdPhantasosRenderPass final : public HdRenderPass {
     bool _converged = false;
     phantasos::Frame _frame;
 
-    // Generation: the request the current frame is waiting for (0: none).
+    // Generation: the request the current frame is waiting for (0: none),
+    // and the first request made for the current view: a streamed picture
+    // of that request or a later one shows this view.
     std::uint64_t _nextKey = 0;
     std::uint64_t _awaitingKey = 0;
+    std::uint64_t _viewKey = 0;
+    HdPhantasosWorkerLink::Request _lastRequest;  // sent again to feed a stream
+    // The last streamed picture, as the colour AOV holds it: kept on screen
+    // while the camera moves, rather than flashing back to the proxy.
+    std::vector<float> _streamColor;
+    unsigned int _streamWidth = 0, _streamHeight = 0;
+    std::string _streamModel;
     std::chrono::steady_clock::time_point _submitted;
     std::string _reportedError;
 };

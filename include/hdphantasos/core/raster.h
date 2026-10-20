@@ -34,6 +34,7 @@ enum class Role : std::uint8_t {
     Subject,   // a thing in the scene: drawn in its own flat colour
     Ground,    // what things stand on: drawn as a grey checkerboard
     Backdrop,  // walls, sky domes, distant set: flat colour, described last
+    Hero,      // the subject the shot follows: drawn like a subject, described first
 };
 
 const char* RoleName(Role role);
@@ -137,6 +138,7 @@ struct SubjectView {
     float centroid[2] = {0, 0};     // 0..1, top-left origin
     float nearest = 0.0f;           // distance from the camera, world units
     float mean = 0.0f;
+    float position[3] = {0, 0, 0};  // mean world position of the visible pixels
     bool hasFacing = false;
     float front[3] = {0, 0, 0};     // the subject's +Z in view space
     const char* facing = "";        // "toward the camera", "away", "left", "right"

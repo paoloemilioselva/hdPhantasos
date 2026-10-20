@@ -71,6 +71,17 @@ class JsonFields {
         return false;
     }
 
+    bool Bool(const char* key, bool* out) const
+    {
+        for (const auto& [name, value, isString] : _fields) {
+            if (name == key && !isString && (value == "true" || value == "false")) {
+                *out = value == "true";
+                return true;
+            }
+        }
+        return false;
+    }
+
   private:
     struct Field {
         std::string name, value;
@@ -646,10 +657,10 @@ void HdPhantasosWorkerLink::Submit(Request request)
     _wake.notify_all();
 }
 
-std::optional<HdPhantasosWorkerLink::Result> HdPhantasosWorkerLink::Take(std::uint64_t key)
+std::optional<HdPhantasosWorkerLink::Result> HdPhantasosWorkerLink::Take()
 {
     std::lock_guard<std::mutex> lock(_mutex);
-    if (!_result || _result->key != key) return std::nullopt;
+    if (!_result) return std::nullopt;
     std::optional<Result> result = std::move(_result);
     _result.reset();
     return result;
@@ -682,6 +693,7 @@ void HdPhantasosWorkerLink::_Run()
 
         Result result;
         result.key = request.key;
+        result.source = request.key;
         bool running;
         std::string startError;
         {
@@ -851,6 +863,10 @@ bool HdPhantasosWorkerLink::_Exchange(const Request& request, Result* result)
             fields.Number("height", &height);
             fields.Number("ms", &result->milliseconds);
             fields.String("prompt", &result->prompt);
+            double source = static_cast<double>(request.key);
+            fields.Number("source", &source);
+            result->source = static_cast<std::uint64_t>(source);
+            fields.Bool("stream", &result->stream);
             result->width = static_cast<int>(width);
             result->height = static_cast<int>(height);
             const std::size_t bytes = static_cast<std::size_t>(result->width) * result->height * 3;

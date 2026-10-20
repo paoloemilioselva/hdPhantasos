@@ -19,6 +19,7 @@ if "--cache" in arguments:
     cache = arguments[at + 1]
     del arguments[at:at + 2]
     os.environ.setdefault("HF_HOME", os.path.join(cache, "hf"))
+    os.environ["HDPHANTASOS_CACHE"] = cache
 if "--allow-download" not in arguments:
     os.environ["HF_HUB_OFFLINE"] = "1"
 os.environ.setdefault("HF_HUB_DISABLE_PROGRESS_BARS", "1")

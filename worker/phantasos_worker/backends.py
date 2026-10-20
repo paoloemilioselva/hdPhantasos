@@ -98,12 +98,44 @@ class Klein:
         return result.images[0], text
 
 
+class EchoStream:
+    """No model, streaming: answers each frame with the one before it, as a
+    stream one frame behind would. For tests of the delegate's stream path."""
+
+    name = "echo-stream"
+    streaming = True
+
+    def __init__(self):
+        self.previous = None
+
+    def generate(self, proxy, manifest, settings, frame_id=0):
+        picture, prompt = Echo().generate(proxy, manifest, settings)
+        shown = self.previous or (frame_id, picture)
+        self.previous = (frame_id, picture)
+        return shown[1], prompt, shown[0]
+
+
 def create(name, allow_download, status):
     if name == "echo":
         return Echo()
+    if name == "echo-stream":
+        return EchoStream()
     if name in ("klein4b", "klein"):
         return Klein(allow_download, status)
-    raise ValueError(f"unknown model '{name}'; known: klein4b, echo")
+    if name in ("matrixgame", "matrix-game"):
+        from .matrix_game import MatrixGame
+        return MatrixGame(allow_download, status, os.environ.get("HDPHANTASOS_CACHE", ""))
+    raise ValueError(f"unknown model '{name}'; known: klein4b, matrixgame, echo, echo-stream")
+
+
+def free_memory():
+    """Give the GPU memory of models just dropped back to the driver."""
+    import gc
+    gc.collect()
+    if "torch" in sys.modules:
+        import torch
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
 
 def cache_directory():
