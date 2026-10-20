@@ -9,10 +9,10 @@ Phantasos was the god who sent dreams of things (objects, landscapes, water and
 stone) rather than of people. Here he turns boxes into a world.
 
 > **Status: phase 1b.** The delegate, the proxy and the descriptions work in
-> usdview and usdrecord. Generation works through usdrecord on Windows with
-> two models: FLUX.2 Klein 4B (stills) and Matrix-Game 4.0 racing
-> (streaming, about 20 frames a second). Generation in the usdview viewport
-> and the Linux build are not tested yet. See [docs/roadmap.md](docs/roadmap.md).
+> usdview and usdrecord, on Windows and Linux. Generation works with two
+> models: FLUX.2 Klein 4B (stills) and Matrix-Game 4.0 racing (streaming,
+> about 20 frames a second), through usdrecord and, for Matrix-Game, in the
+> usdview viewport. See [docs/roadmap.md](docs/roadmap.md).
 
 | The example stage, as the model will see it | Pixar's Kitchen set, undescribed (1,788 meshes, 77 ms) |
 |---|---|

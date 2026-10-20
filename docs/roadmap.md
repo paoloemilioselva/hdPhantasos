@@ -2,9 +2,9 @@
 
 | Phase | Result | State |
 |---|---|---|
-| **0** | The delegate in usdview and usdrecord: CPU rasterizer, proxy, AOVs, the PhantasosAPI schema, the per-frame manifest, an example stage, tests | **Done on Windows, 2026-10-20.** Linux not compiled yet |
+| **0** | The delegate in usdview and usdrecord: CPU rasterizer, proxy, AOVs, the PhantasosAPI schema, the per-frame manifest, an example stage, tests | **Done on Windows, 2026-10-20; builds and works on Linux, 2026-10-21** |
 | **1** | The worker: its own process and venv, self-setup (uv, PyTorch for the driver, weights only with downloads allowed), shared-memory frames, and the first model: FLUX.2 Klein 4B, a still from the proxy and a prompt written from the manifest | **Working through usdrecord on Windows, 2026-10-20.** usdview viewport not tried yet; prompt still leaks flat colours in the flat look |
-| **1b** | Matrix-Game 4.0 racing as a streaming back end: frames in order, a session per shot | **Working through usdrecord on Windows, 2026-10-20**: about 20 frames a second on the RTX 5060 Ti. usdview viewport not tried yet |
+| **1b** | Matrix-Game 4.0 racing as a streaming back end: frames in order, a session per shot | **Working through usdrecord on Windows, 2026-10-20**: about 20 frames a second on the RTX 5060 Ti. Streams in the usdview viewport |
 | **2** | Sequences: consistent clips from a camera move or an animated stage, offline through usdrecord (Wan2.2-Fun-Control), and Matrix-Game 4.0's racing checkpoint as a real-time streaming experiment | |
 | **3** | Houdini Solaris: a build against the HDK | Later, not planned yet |
 
